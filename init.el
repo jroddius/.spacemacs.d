@@ -69,7 +69,15 @@ values."
             ;; change shell from bash with athame-readline back to regualar bash with readline
             shell-default-term-shell "/bin/bash"
             )
-     ;; spell-checking
+     (spell-checking :variables
+                     ;;uncomment for autodictionary mode
+                     ;;spell-checking-enable-auto-dictionary t
+
+                     ;;uncomment to disable spellcheck by default
+                     ;;spell-checking :variables spell-checking-enable-by-default nil
+
+                     ;;enable auto-completion popup when idle over unspelled word
+                     enable-flyspell-auto-completion t)
      ;; syntax-checking
      ;; version-control
      )
