@@ -42,7 +42,7 @@ values."
      emacs-lisp
      git
      ;; markdown
-      org
+     org 
      (c-c++ :variables c-c++-enable-clang-support t)
      (shell :variables
             shell-default-height 45
@@ -314,14 +314,26 @@ before packages are loaded. If you are unsure, you should try in setting them in
 
 ;;MAGIT
   ;;Tells Magit where the git repos are for the auto-complete feature
-  (setq magit-repository-directories "~/Programming/repos")
+  (setq magit-repository-directories '("~/Programming/repos"))
   ;;uncomment line below for Magit SVN plugin
   ;;(defun dotspacemacs/user-init () (setq-defult git-enable-magit-svn-plugin t))
   ;;adds the ability to edit commits in Magit
   (global-git-commit-mode)
 
-  ;; Add helm-pass
+;; helm-pass
   (use-package helm-pass)
+
+;;Org
+  ;; github for org
+  (setq-default org-enable-github-suppport t)
+  
+  ;; Put a TODOs file in every root project
+  (setq-default org-projectile-file "TODOs.org")
+
+  ;; Add TODOs automatically to agenda
+  (with-eval-after-load 'org-agenda
+    (require 'org-projectile)
+    (push (org-projectile:todo-files) org-agenda-files))
 
   "Configuration function for user code.
 
