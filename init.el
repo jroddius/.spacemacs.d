@@ -348,6 +348,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
 ;;MAGIT
   ;;Tells Magit where the git repos are for the auto-complete feature
   (setq magit-repository-directories '("~/Programming/repos"))
+  (setq magit-refresh-status-buffer nil)
   ;;uncomment line below for Magit SVN plugin
   ;;(defun dotspacemacs/user-init () (setq-defult git-enable-magit-svn-plugin t))
   ;;adds the ability to edit commits in Magit
