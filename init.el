@@ -684,7 +684,7 @@ before packages are loaded."
              "* TODO %? :%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:")
 
             ;; Collect anything that takes more than two actions here.
-            ("tp" "Project tasks(two actions or more)" entry (file+headline "myGTD.org" "Projects")
+            ("tp" "Project tasks(two actions or more)" entry (file "Projects.org")
              "* TODO %? [/] :%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:")
 
             ;; Tasks with single actions
@@ -754,7 +754,8 @@ before packages are loaded."
     (setq org-agenda-custom-commands
           '(("x" "Agenda Block View"
              ((agenda)
-              (org-agenda-files '("~/Documents/org/myGTD.org"))))
+              (org-agenda-files '("~/Documents/org/myGTD.org"
+                                  "~/Documents/org/Projects.org"))))
 
             ("n" "NEXT todos"
              todo "NEXT")
@@ -765,7 +766,8 @@ before packages are loaded."
              ((todo "NEXT")
               (todo "TODO"))
              ((org-agenda-tag-filter-preset '("+computer"))
-              (org-agenda-files '("~/Documents/org/myGTD.org"))
+              (org-agenda-files '("~/Documents/org/myGTD.org"
+                                  "~/Documents/org/Projects.org"))
               (org-agenda-category-filter-preset '("-Financial"
                                                    "-Calendar"))))
 
@@ -773,7 +775,8 @@ before packages are loaded."
              ((todo "NEXT")
               (todo "TODO"))
              ((org-agenda-tag-filter-preset '("+home"))
-              (org-agenda-files '("~/Documents/org/myGTD.org"))
+              (org-agenda-files '("~/Documents/org/myGTD.org"
+                                  "~/Documents/org/Projects.org"))
               (org-agenda-category-filter-preset '("-Financial"
                                                    "-Calendar"))))
 
@@ -781,7 +784,8 @@ before packages are loaded."
              ((todo "NEXT")
               (todo "TODO"))
              ((org-agenda-tag-filter-preset '("+work"))
-              (org-agenda-files '("~/Documents/org/myGTD.org"))
+              (org-agenda-files '("~/Documents/org/myGTD.org"
+                                  "~/Documents/org/Projects.org"))
               (org-agenda-category-filter-preset '("-Financial"
                                                    "-Calendar"))))
 
@@ -789,7 +793,8 @@ before packages are loaded."
              ((todo "NEXT")
               (todo "TODO"))
              ((org-agenda-tag-filter-preset '("+errand"))
-              (org-agenda-files '("~/Documents/org/myGTD.org"))
+              (org-agenda-files '("~/Documents/org/myGTD.org"
+                                  "~/Documents/org/Projects.org"))
               (org-agenda-category-filter-preset '("-Financial"
                                                    "-Calendar"))))
 
@@ -797,7 +802,8 @@ before packages are loaded."
              ((todo "NEXT")
               (todo "TODO"))
              ((org-agenda-tag-filter-preset '("+school"))
-              (org-agenda-files '("~/Documents/org/myGTD.org"))
+              (org-agenda-files '("~/Documents/org/myGTD.org"
+                                  "~/Documents/org/Projects.org"))
               (org-agenda-category-filter-preset '("-Financial"
                                                    "-Calendar"))))
 
@@ -838,6 +844,7 @@ before packages are loaded."
 
     ;;set the defautlt location for agenda files
     (setq org-agenda-files '("~/Documents/org/myGTD.org"
+                             "~/Documents/org/Projects.org"
                              "~/Documents/org/Collection.org"
                              "~/Documents/org/Read.org"
                              "~/Documents/org/Someday.org"
@@ -905,7 +912,19 @@ before packages are loaded."
                 (flyspell-mode 1)))
 
     ;; Set up org-refile targets here
-    (setq org-refile-targets (quote ((org-agenda-files :maxlevel . 3))))
+    (setq org-refile-targets (quote (("myGTD.org::Tasks" :level . 1)
+                                     ("myGTD.org::Financial" :level . 1)
+                                     ("myGTD.org::Calendar" :level . 1)
+                                     ("myGTD.org::Car Maintenance/Repair" :level . 1)
+                                     ("Projects.org" :maxlevel . 1)
+                                     ("Someday.org" :level . 0)
+                                     ("Waiting.org" :level . 0)
+                                     ("References.org" :level . 0)
+                                     ("Delegated.org" :level . 0)
+                                     ("Read.org" :level . 0))))
+
+    ;; set to nil so org refile shows all possible targets in helm at one time
+    (setq org-outline-path-complete-in-steps nil)
 
     ;; Set to true to allow org-refile to create new nodes as new parents in org files.
     (setq org-refile-allow-creating-parent-nodes t)
@@ -1049,6 +1068,7 @@ before packages are loaded."
 
   ;; open buffers in emacs automatically
   (find-file-noselect "~/Documents/org/myGTD.org")
+  (find-file-noselect "~/Documents/org/Projects.org")
   (find-file-noselect "~/Documents/org/Collection.org")
   (find-file-noselect "~/Documents/org/References.org")
   (find-file-noselect "~/Documents/org/Read.org")
@@ -1085,21 +1105,22 @@ before packages are loaded."
 This is an auto-generated function, do not modify its content directly, use
 Emacs customize menu instead.
 This function is called at the very end of Spacemacs initialization."
-  (custom-set-variables
-   ;; custom-set-variables was added by Custom.
-   ;; If you edit it by hand, you could mess it up, so be careful.
-   ;; Your init file should contain only one such instance.
-   ;; If there is more than one, they won't work right.
-   '(evil-want-Y-yank-to-eol nil)
-   '(package-selected-packages
-     (quote
-      (mu4e-maildirs-extension mu4e-alert helm-mu php-extras zenburn-theme zen-and-art-theme white-sand-theme underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme seti-theme reverse-theme rebecca-theme railscasts-theme purple-haze-theme professional-theme planet-theme phoenix-dark-pink-theme phoenix-dark-mono-theme organic-green-theme omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme naquadah-theme mustang-theme monokai-theme monochrome-theme molokai-theme moe-theme minimal-theme material-theme majapahit-theme madhat2r-theme lush-theme light-soap-theme jbeans-theme jazz-theme ir-black-theme inkpot-theme heroku-theme hemisu-theme hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme gandalf-theme flatui-theme flatland-theme farmhouse-theme exotica-theme espresso-theme dracula-theme django-theme darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cyberpunk-theme color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized clues-theme cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes afternoon-theme helm-pass vmd-mode mmm-mode markdown-toc gh-md company-auctex auctex drupal-mode phpunit phpcbf php-auto-yasnippets php-mode pkgbuild-mode typit mmt sudoku pacmacs dash-functional 2048-game flyspell-popup company-quickhelp auth-source-pass password-store smeargle orgit magit-gitflow helm-gitignore gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link evil-magit magithub markdown-mode ghub+ magit magit-popup git-commit apiwrap ghub let-alist with-editor web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data flycheck-pos-tip pos-tip flycheck flyspell-correct-helm flyspell-correct auto-dictionary ox-gfm org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot insert-shebang fish-mode company-shell xterm-color shell-pop multi-term eshell-z eshell-prompt-extras esh-help helm-company helm-c-yasnippet fuzzy disaster company-statistics company-c-headers company cmake-mode clang-format auto-yasnippet yasnippet ac-ispell auto-complete ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
-  (custom-set-faces
-   ;; custom-set-faces was added by Custom.
-   ;; If you edit it by hand, you could mess it up, so be careful.
-   ;; Your init file should contain only one such instance.
-   ;; If there is more than one, they won't work right.
-   '(default ((t (:background nil))))
-   '(company-tooltip-common ((t (:inherit company-tooltip :weight bold :underline nil))))
-   '(company-tooltip-common-selection ((t (:inherit company-tooltip-selection :weight bold :underline nil)))))
-  )
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(evil-want-Y-yank-to-eol nil)
+ '(org-agenda-files (quote ("~/Documents/org/myGTD.org")))
+ '(package-selected-packages
+   (quote
+    (mu4e-maildirs-extension mu4e-alert helm-mu php-extras zenburn-theme zen-and-art-theme white-sand-theme underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme seti-theme reverse-theme rebecca-theme railscasts-theme purple-haze-theme professional-theme planet-theme phoenix-dark-pink-theme phoenix-dark-mono-theme organic-green-theme omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme naquadah-theme mustang-theme monokai-theme monochrome-theme molokai-theme moe-theme minimal-theme material-theme majapahit-theme madhat2r-theme lush-theme light-soap-theme jbeans-theme jazz-theme ir-black-theme inkpot-theme heroku-theme hemisu-theme hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme gandalf-theme flatui-theme flatland-theme farmhouse-theme exotica-theme espresso-theme dracula-theme django-theme darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cyberpunk-theme color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized clues-theme cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes afternoon-theme helm-pass vmd-mode mmm-mode markdown-toc gh-md company-auctex auctex drupal-mode phpunit phpcbf php-auto-yasnippets php-mode pkgbuild-mode typit mmt sudoku pacmacs dash-functional 2048-game flyspell-popup company-quickhelp auth-source-pass password-store smeargle orgit magit-gitflow helm-gitignore gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link evil-magit magithub markdown-mode ghub+ magit magit-popup git-commit apiwrap ghub let-alist with-editor web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data flycheck-pos-tip pos-tip flycheck flyspell-correct-helm flyspell-correct auto-dictionary ox-gfm org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot insert-shebang fish-mode company-shell xterm-color shell-pop multi-term eshell-z eshell-prompt-extras esh-help helm-company helm-c-yasnippet fuzzy disaster company-statistics company-c-headers company cmake-mode clang-format auto-yasnippet yasnippet ac-ispell auto-complete ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(default ((t (:background nil))))
+ '(company-tooltip-common ((t (:inherit company-tooltip :weight bold :underline nil))))
+ '(company-tooltip-common-selection ((t (:inherit company-tooltip-selection :weight bold :underline nil)))))
+)
