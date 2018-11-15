@@ -860,6 +860,8 @@ before packages are loaded."
 
     (global-set-key (kbd "C-c n p") 'org-projectile-project-todo-completing-read)
 
+    (setq org-projectile-capture-template  "* TODO %? :%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:")
+
     ;; set the default location to store done tasks
     ;; (setq org-archive-location "archive.org::")
 
