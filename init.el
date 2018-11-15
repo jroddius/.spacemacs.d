@@ -66,6 +66,10 @@ This function should only modify configuration layer settings."
      themes-megapack
      theming
 
+     ;; email client
+     (mu4e :variables
+           mu4e-enable-async-operations t)
+
      ;; unix password manager
      pass
 
@@ -445,7 +449,7 @@ It should only modify the values of Spacemacs settings."
 
    ;; If non-nil pressing the closing parenthesis `)' key in insert mode passes
    ;; over any automatically added closing parenthesis, bracket, quote, etc…
-   ;; This can be temporary disabled by pressing `C-q' before `)'. (default nil)
+   ;; This can be temporary disabled by pressing `C-q' before ')'. (default nil)
    dotspacemacs-smart-closing-parenthesis nil
 
    ;; Select a scope to highlight delimiters. Possible values are `any',
@@ -508,7 +512,7 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-zone-out-when-idle nil
 
    ;; Use develop stable repository to fix org-projectile
-   dotspacemacs-use-spacelpa t
+   dotspacemacs-use-spacelpa nil
 
    ;; Run `spacemacs/prettify-org-buffer' when
    ;; visiting README.org files of Spacemacs.
@@ -581,6 +585,12 @@ before packages are loaded."
   ;;Org
 
   (with-eval-after-load 'org
+
+    ;; set key bindings for org here.
+    (define-key evil-normal-state-map (kbd "SPC a S") 'org-save-all-org-buffers)
+    (define-key evil-normal-state-map (kbd "SPC a O") 'org-switchb)
+    (evil-define-key 'normal org-mode-map (kbd ", O") 'org-switchb)
+    (evil-define-key 'normal org-mode-map (kbd ", S") 'org-save-all-org-buffers)
 
     ;;set the directory where all your org files will be stored.
     (setq org-directory "~/Documents/org")
@@ -674,7 +684,7 @@ before packages are loaded."
              "* TODO %? :%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:")
 
             ;; Collect anything that takes more than two actions here.
-            ("tp" "Project tasks(two actions or more)" entry (file+headline "myGTD.org" "Project")
+            ("tp" "Project tasks(two actions or more)" entry (file+headline "myGTD.org" "Projects")
              "* TODO %? [/] :%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:")
 
             ;; Tasks with single actions
@@ -738,88 +748,80 @@ before packages are loaded."
 
             ;; Capture a general reference
             ("r" "Capture a typed reference" entry (file "Reference.org")
-             "* REFERENCE %?%^G\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:")
-            ))
+             "* REFERENCE %?%^G\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:")))
 
     ;; Set my org agenda views here.
     (setq org-agenda-custom-commands
           '(("x" "Agenda Block View"
              ((agenda)
-              (tags-todo "home")
-              (tags-todo "computer")
-              (tags-todo "work")
-              (tags-todo "errand")
-              (tags-todo "school"))
-             ((org-agenda-sorting-strategy '(todo-state-down))
-              (org-agenda-category-filter-preset '("-Collection"
-                                                   "-References"
-                                                   "-Someday"
-                                                   "-Waiting"))))
+              (org-agenda-files '("~/Documents/org/myGTD.org"))))
+
+            ("n" "NEXT todos"
+             todo "NEXT")
 
             ("y" "Appointments" agenda*)
 
             ("c" "Computer todos"
-             tags-todo "computer"
-             ((org-agenda-sorting-strategy '(todo-state-down))
-              (org-agenda-category-filter-preset '("-Collection"
-                                                   "-References"
-                                                   "-Someday"
-                                                   "-Waiting"))))
-
-            ("n" "NEXT todos"
-             todo "NEXT"
-             ((org-agenda-category-filter-preset '("-Collection"
-                                                   "-References"
-                                                   "-Someday"
-                                                   "-Waiting"))))
+             ((todo "NEXT")
+              (todo "TODO"))
+             ((org-agenda-tag-filter-preset '("+computer"))
+              (org-agenda-files '("~/Documents/org/myGTD.org"))
+              (org-agenda-category-filter-preset '("-Financial"
+                                                   "-Calendar"))))
 
             ("h" "Home todos"
-             tags-todo "home"
-             ((org-agenda-sorting-strategy '(todo-state-down))
-              (org-agenda-category-filter-preset '("-Collection"
-                                                   "-References"
-                                                   "-Someday"
-                                                   "-Waiting"))))
+             ((todo "NEXT")
+              (todo "TODO"))
+             ((org-agenda-tag-filter-preset '("+home"))
+              (org-agenda-files '("~/Documents/org/myGTD.org"))
+              (org-agenda-category-filter-preset '("-Financial"
+                                                   "-Calendar"))))
 
             ("w" "Work todos"
-             tags-todo "work"
-             ((org-agenda-sorting-strategy '(todo-state-down))
-              (org-agenda-category-filter-preset '("-Collection"
-                                                   "-References"
-                                                   "-Someday"
-                                                   "-Waiting"))))
+             ((todo "NEXT")
+              (todo "TODO"))
+             ((org-agenda-tag-filter-preset '("+work"))
+              (org-agenda-files '("~/Documents/org/myGTD.org"))
+              (org-agenda-category-filter-preset '("-Financial"
+                                                   "-Calendar"))))
 
             ("e" "Errand todos"
-             tags-todo "errand"
-             ((org-agenda-sorting-strategy '(todo-state-down))
-              (org-agenda-category-filter-preset '("-Collection"
-                                                   "-References"
-                                                   "-Someday"
-                                                   "-Waiting"))))
+             ((todo "NEXT")
+              (todo "TODO"))
+             ((org-agenda-tag-filter-preset '("+errand"))
+              (org-agenda-files '("~/Documents/org/myGTD.org"))
+              (org-agenda-category-filter-preset '("-Financial"
+                                                   "-Calendar"))))
 
             ("s" "School todos"
-             tags-todo "school"
-             ((org-agenda-sorting-strategy '(todo-state-down))
-              (org-agenda-category-filter-preset '("-Collection"
-                                                   "-References"
-                                                   "-Someday"
-                                                   "-Waiting"))))
+             ((todo "NEXT")
+              (todo "TODO"))
+             ((org-agenda-tag-filter-preset '("+school"))
+              (org-agenda-files '("~/Documents/org/myGTD.org"))
+              (org-agenda-category-filter-preset '("-Financial"
+                                                   "-Calendar"))))
 
             ("i" "Collection"
              todo "TODO"
-             ((org-agenda-category-filter-preset '("+Collection"))))
+             ((org-agenda-files '("~/Documents/org/Collection.org"))))
 
             ("r" "References"
              todo "REFERENCE"
-             ((org-agenda-category-filter-preset '("+References"))))
+             ((org-agenda-files '("~/Documents/org/References.org"))))
 
             ("o" "Someday"
-             todo "SOMEDAY"
-             ((org-agenda-category-filter-preset '("+Someday"))))
+             ((tags "NEXT")
+              (todo "SOMEDAY"))
+             ((org-agenda-files '("~/Documents/org/Someday.org"))))
 
             ("v" "Waiting"
              todo "WAITING"
-             ((org-agenda-category-filter-preset '("+Waiting"))))))
+             ((org-agenda-files '("~/Documents/org/Waiting.org"))))
+
+            ("R" "What to read?"
+             ((tags "NEXT")
+              (todo "TODO"))
+             ((org-agenda files '("~/Documents/org/Read.org"))))))
 
     ;; Change todo to done when all of it's children are finished
     (defun org-summary-todo (n-done n-not-done)
@@ -843,11 +845,11 @@ before packages are loaded."
 
     ;; Projectile configuration
     (with-eval-after-load 'org-agenda
-    (require 'org-projectile)
-    (mapcar '(lambda (file)
-               (when (file-exists-p file)
-                 (push file org-agenda-files)))
-            (org-projectile-todo-files)))
+      (require 'org-projectile)
+      (mapcar '(lambda (file)
+                 (when (file-exists-p file)
+                   (push file org-agenda-files)))
+              (org-projectile-todo-files)))
 
     (global-set-key (kbd "C-c n p") 'org-projectile-project-todo-completing-read)
 
@@ -867,41 +869,29 @@ before packages are loaded."
     (setq org-export-with-archived-trees t)
 
     ;; This function moves all "DONE" "SOMEDAY" "WAITING" "TODO"s in agenda files to corresponding org files
-    (defun my/org-archive-multi-tasks ()
-      (interactive)
-      (loop for (lowercase-todo-type  uppercase-todo-type) in '(("Trash" "/GONE")
-                                                                ("Trash" "/TRASH")
-                                                                ("Trash" "/DISPOSED")
-                                                                ("Trash" "/CANCELLED")
-                                                                ("Trash" "/WAITING")
-                                                                ("Delegated" "/DELEGATED"))
+    ;; (defun my/org-archive-multi-tasks ()
+    ;;   (interactive)
+    ;;   (loop for (lowercase-todo-type  uppercase-todo-type) in '(("Trash" "/GONE")
+    ;;                                                             ("Trash" "/TRASH")
+    ;;                                                             ("Trash" "/DISPOSED")
+    ;;                                                             ("Trash" "/CANCELLED")
+    ;;                                                             ("Waiting" "/WAITING")
+    ;;                                                             ("Delegated" "/DELEGATED"))
 
-            ;; Create string with variables to set org-archive-location
-            do (setq org-archive-location (concat lowercase-todo-type ".org::"))
-            (setq org-collection-file-list '("~/Documents/org/myGTD.org"
-                                             "~/Documents/org/Collection.org"
-                                             "~/Documents/org/References.org"
-                                             "~/Documents/org/Someday.org"))
+    ;;         ;; Create string with variables to set org-archive-location
+    ;;         do (setq org-archive-location (concat lowercase-todo-type ".org::"))
+    ;;         (setq org-collection-file-list '("~/Documents/org/myGTD.org"
+    ;;                                          "~/Documents/org/Collection.org"
+    ;;                                          "~/Documents/org/References.org"
+    ;;                                          "~/Documents/org/Someday.org"))
 
-            (org-map-entries
-             (lambda ()
-               (org-archive-subtree)
-               (setq org-map-continue-from (outline-previous-heading)))
-             uppercase-todo-type org-collection-file-list))
+    ;;         (org-map-entries
+    ;;          (lambda ()
+    ;;            (org-archive-subtree)
+    ;;            (setq org-map-continue-from (outline-previous-heading)))
+    ;;          uppercase-todo-type org-collection-file-list))
 
-      (setq org-archive-location '%s_archive::))
-
-                                        ;(defun my/org-archive-done-tasks ()
-                                        ;  (interactive)
-                                        ;  (setq org-archive-save-context-info (todo ltags))
-                                        ;  (setq org-archive-location "archive.org")
-                                        ;  (org-map-entries
-                                        ;   (lambda ()
-                                        ;     (org-archive-subtree)
-                                        ;     (setq org-map-continue-from (outline-previous-heading)))
-                                        ;   "/DONE" 'agenda))
-
-
+    ;;   (setq org-archive-location '%s_archive::))
 
     ;; set autofill in org-mode for word processor like wordwrap functionality.
     (add-hook 'org-mode-hook
@@ -912,11 +902,10 @@ before packages are loaded."
                 (setq fill-column 80)
                 ;;enable automatic line wrapping at fill column
                 (auto-fill-mode t)
-                (flyspell-mode 1)
-                )
-              )
+                (flyspell-mode 1)))
+
     ;; Set up org-refile targets here
-    (setq org-refile-targets (quote ((org-agenda-files :maxlevel . 9))))
+    (setq org-refile-targets (quote ((org-agenda-files :maxlevel . 3))))
 
     ;; Set to true to allow org-refile to create new nodes as new parents in org files.
     (setq org-refile-allow-creating-parent-nodes t)
@@ -949,6 +938,9 @@ before packages are loaded."
                           '(org-expiry-insert-created &optional t))
                          (t (message "Unrecognized option bad char!")))))
 
+    ;; Create a variable for the expiry property
+    (setq org-expiry-expiry-property-name "EXPIRY")
+
     ;; Set the function to run when calling org-expiry
     (setq org-expiry-handler-function 'org-expiry-add-keyword)
 
@@ -962,20 +954,19 @@ before packages are loaded."
     ;; "insert" helper function for my/org-expiry-add-timestamp-1y-expiry ()
     (defun my/org-expiry-helper-insert-expiry ()
       (save-excursion
-      (org-entry-put
-       (point) org-expiry-expiry-property-name timestr)))
+        (org-entry-put
+         (point) org-expiry-expiry-property-name timestr)))
 
     ;; Add expiry mechanism to emacs items will expire in one year at which time
     ;; you may check for expired entries with M-x org-expiry-process-entries.
     (defun my/org-expiry-add-timestamp-1y-expiry ()
       (interactive)
       (save-excursion
-      (when (string= (org-get-todo-state) "TODO")
-        (let* ((d (org-entry-get (point) org-expiry-expiry-property-name)))
-          (setq timestr "1y")
-          (my/org-expiry-helper-insert-create)
-          (my/org-expiry-helper-insert-expiry)
-          ))))
+        (when (string= (org-get-todo-state) "TODO")
+          (let* ((d (org-entry-get (point) org-expiry-expiry-property-name)))
+            (setq timestr "1y")
+            (my/org-expiry-helper-insert-create)
+            (my/org-expiry-helper-insert-expiry)))))
 
     ;; Set timestamps inactive so everything doesn't show up in the agenda
     (setq org-expiry-inactive-timestamps t)
@@ -994,7 +985,33 @@ before packages are loaded."
 
     ;; Don't show scheduled items that are already "DONE".
     (setq org-agenda-skip-scheduled-if-done t)
-    )
+    (setq org-agenda-skip-deadline-if-done t)
+    (setq org-agenda-skip-timestamp-if-deadline-is-shown t)
+    (setq org-agenda-skip-timestamp-if-done t))
+
+  (setq mu4e-maildir "~/.mail"
+        mu4e-trash-folder "/gmail/[Gmail]/Trash"
+        mu4e-refile-folder "/gmail/email_archive"
+        mu4e-get-mail-command "mbsync -a"
+        mu4e-update-interval nil
+        mu4e-compose-signature-auto-include t
+        mu4e-view-show-images t
+        mu4e-view-show-addresses t
+        mu4e-sent-folder "/gmail/[Gmail]/Sent Mail"
+        mu4e-drafts-folder "/gmail/[Gmail]/Drafts")
+
+  (setq mu4e-maildir-shortcuts
+        '(("/gmail/primary/" . ?p)
+          ("/gmail/promotions/" . ?P)
+          ("/gmail/social_email/" . ?s)
+          ("/gmail/forums_email/" . ?f)
+          ("/gmail/Family/" . ?F)
+          ("/gmail/Work/" . ?w)
+          ("/gmail/email_updates/" . ?u)
+          ("/gmail/[Gmail]/Drafts/" . ?d)
+          ("/gmail/[Gmail]/Sent Mail/" . ?S)
+          ("/gmail/[Gmail]/Spam/" . ?!)
+          ("/gmail/[Gmail]/Trash/" . ?t)))
 
   ;; auto-completion
   ;; make company the global auto-completion plugin
@@ -1068,19 +1085,21 @@ before packages are loaded."
 This is an auto-generated function, do not modify its content directly, use
 Emacs customize menu instead.
 This function is called at the very end of Spacemacs initialization."
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(evil-want-Y-yank-to-eol nil)
- '(package-selected-packages
-   (quote
-    (yasnippet-snippets yapfify web-beautify symon string-inflection spaceline-all-the-icons pyvenv pytest pyenv-mode py-isort pippel pipenv pip-requirements password-generator pandoc-mode ox-twbs ox-reveal ox-pandoc ox-hugo overseer org-ref pdf-tools key-chord tablist org-brain nameless magit-svn live-py-mode kaolin-themes importmagic epc ctable concurrent deferred impatient-mode simple-httpd helm-xref helm-rtags helm-pydoc helm-purpose window-purpose imenu-list helm-bibtex parsebib google-c-style gitignore-templates frame-mode eziam-theme evil-org evil-lion evil-goggles evil-cleverparens paredit emojify ht emoji-cheat-sheet-plus editorconfig doom-themes all-the-icons memoize cython-mode counsel-projectile counsel swiper ivy company-rtags rtags company-php ac-php-core xcscope company-emoji company-anaconda centered-cursor-mode biblio biblio-core anaconda-mode pythonic font-lock+ dotenv-mode php-extras zenburn-theme zen-and-art-theme white-sand-theme underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme seti-theme reverse-theme rebecca-theme railscasts-theme purple-haze-theme professional-theme planet-theme phoenix-dark-pink-theme phoenix-dark-mono-theme organic-green-theme omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme naquadah-theme mustang-theme monokai-theme monochrome-theme molokai-theme moe-theme minimal-theme material-theme majapahit-theme madhat2r-theme lush-theme light-soap-theme jbeans-theme jazz-theme ir-black-theme inkpot-theme heroku-theme hemisu-theme hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme gandalf-theme flatui-theme flatland-theme farmhouse-theme exotica-theme espresso-theme dracula-theme django-theme darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cyberpunk-theme color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized clues-theme cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes afternoon-theme helm-pass vmd-mode mmm-mode markdown-toc gh-md company-auctex auctex drupal-mode phpunit phpcbf php-auto-yasnippets php-mode pkgbuild-mode typit mmt sudoku pacmacs dash-functional 2048-game flyspell-popup company-quickhelp auth-source-pass password-store smeargle orgit magit-gitflow helm-gitignore gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link evil-magit magithub markdown-mode ghub+ magit magit-popup git-commit apiwrap ghub let-alist with-editor web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data flycheck-pos-tip pos-tip flycheck flyspell-correct-helm flyspell-correct auto-dictionary ox-gfm org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot insert-shebang fish-mode company-shell xterm-color shell-pop multi-term eshell-z eshell-prompt-extras esh-help helm-company helm-c-yasnippet fuzzy disaster company-statistics company-c-headers company cmake-mode clang-format auto-yasnippet yasnippet ac-ispell auto-complete ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(default ((t (:background nil)))))
-)
+  (custom-set-variables
+   ;; custom-set-variables was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   '(evil-want-Y-yank-to-eol nil)
+   '(package-selected-packages
+     (quote
+      (mu4e-maildirs-extension mu4e-alert helm-mu php-extras zenburn-theme zen-and-art-theme white-sand-theme underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme seti-theme reverse-theme rebecca-theme railscasts-theme purple-haze-theme professional-theme planet-theme phoenix-dark-pink-theme phoenix-dark-mono-theme organic-green-theme omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme naquadah-theme mustang-theme monokai-theme monochrome-theme molokai-theme moe-theme minimal-theme material-theme majapahit-theme madhat2r-theme lush-theme light-soap-theme jbeans-theme jazz-theme ir-black-theme inkpot-theme heroku-theme hemisu-theme hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme gandalf-theme flatui-theme flatland-theme farmhouse-theme exotica-theme espresso-theme dracula-theme django-theme darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cyberpunk-theme color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized clues-theme cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes afternoon-theme helm-pass vmd-mode mmm-mode markdown-toc gh-md company-auctex auctex drupal-mode phpunit phpcbf php-auto-yasnippets php-mode pkgbuild-mode typit mmt sudoku pacmacs dash-functional 2048-game flyspell-popup company-quickhelp auth-source-pass password-store smeargle orgit magit-gitflow helm-gitignore gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link evil-magit magithub markdown-mode ghub+ magit magit-popup git-commit apiwrap ghub let-alist with-editor web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data flycheck-pos-tip pos-tip flycheck flyspell-correct-helm flyspell-correct auto-dictionary ox-gfm org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot insert-shebang fish-mode company-shell xterm-color shell-pop multi-term eshell-z eshell-prompt-extras esh-help helm-company helm-c-yasnippet fuzzy disaster company-statistics company-c-headers company cmake-mode clang-format auto-yasnippet yasnippet ac-ispell auto-complete ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
+  (custom-set-faces
+   ;; custom-set-faces was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   '(default ((t (:background nil))))
+   '(company-tooltip-common ((t (:inherit company-tooltip :weight bold :underline nil))))
+   '(company-tooltip-common-selection ((t (:inherit company-tooltip-selection :weight bold :underline nil)))))
+  )
