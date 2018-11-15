@@ -694,33 +694,33 @@ before packages are loaded."
             ("u" "URL Capture")
 
             ("uu" "Capture URL and Title of current webpage for reference" entry (file "References.org")
-             "* REFERENCE %? :url::\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:\n %(shell-command-to-string \"xsel -bo\")")
+             "* REFERENCE %? :url::\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:\n   %(shell-command-to-string \"xsel -bo\")")
 
             ("us" "Capture URL, Title and Selection of current webpage for reference" entry (file "References.org")
-             "* REFERENCE %? :url::\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:\n %(shell-command-to-string \"xsel -bo\")\n %x")
+             "* REFERENCE %? :url::\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:\n   %(shell-command-to-string \"xsel -bo\")  %x")
 
             ("ut" "Capture URL and Title of current webpage for a \"TODO\"" entry (file "Collection.org")
-             "* TODO %? :url:%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:\n %(shell-command-to-string \"xsel -bo\")")
+             "* TODO %? :url:%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:\n   %(shell-command-to-string \"xsel -bo\")")
 
             ("ux" "Capture URL, Title and Selection of current webpage for a \"TODO\"" entry (file "Collection.org")
-             "* TODO %? :url:%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:\n %(shell-command-to-string \"xsel -bo\")\n %x")
+             "* TODO %? :url:%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:\n   %(shell-command-to-string \"xsel -bo\")  %x")
 
             ("f" "Capture file links and region text")
 
             ("ff" "Capture a file to REFERENCE" entry (file "References.org")
-             "* REFERENCE %? :file:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:\n %a")
+             "* REFERENCE %A :filelink:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:\n")
 
             ;; link file to a reference entry
             ("fs" "Capture a file+region(selection) to REFERENCE" entry (file "References.org")
-             "* REFERENCE %?\n   :file:PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:\n %i\n %a")
+             "* REFERENCE %A\n   :filelink:PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:\n  %i\n")
 
             ;; link file to a todo entry
             ("ft" "Capture a file TODO" entry (file "Collection.org")
-             "* TODO %? :file:%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:\n %i\n %a")
+             "* TODO %A :filelink:%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:\n %i\n")
 
             ;; link file to a todo entry
             ("fx" "Capture a file+region TODO" entry (file "Collection.org")
-             "* TODO %? :file:%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:\n %i\n %a")
+             "* TODO %A :filelink:%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:\n %i\n")
 
             ;; Holidays, Dentist, Doctor....
             ("c" "Calendar(main events)" entry (file+headline "myGTD.org" "Calendar")
@@ -784,7 +784,7 @@ before packages are loaded."
              ((todo "NEXT")
               (todo "TODO"))
              ((org-agenda-tag-filter-preset '("+work"))
-              (org-agenda-files '("~/Documents/org/myGTD.org"
+              (rg-agenda-files '("~/Documents/org/myGTD.org"
                                   "~/Documents/org/Projects.org"))
               (org-agenda-category-filter-preset '("-Financial"
                                                    "-Calendar"))))
@@ -858,9 +858,20 @@ before packages are loaded."
                    (push file org-agenda-files)))
               (org-projectile-todo-files)))
 
-    (global-set-key (kbd "C-c n p") 'org-projectile-project-todo-completing-read)
+    
+
+    (defun my/org-projectile-project-todo-at-point()
+      (interactive)
+      (setq org-projectile-capture-template "* TODO %A :%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:")
+      (org-projectile-capture-for-current-project)
+      (setq org-projectile-capture-template  "* TODO %? :%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:"))
 
     (setq org-projectile-capture-template  "* TODO %? :%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:")
+
+    ;; org-projectile keybindings go here
+    (global-set-key (kbd "C-c n p") 'org-projectile-project-todo-completing-read)
+    (global-set-key (kbd "C-c n P") 'org-projectile-capture-for-current-project)
+    (evil-define-key 'normal projectile-mode-map (kbd "C-c n a") 'my/org-projectile-project-todo-at-point)
 
     ;; set the default location to store done tasks
     ;; (setq org-archive-location "archive.org::")
@@ -868,8 +879,7 @@ before packages are loaded."
     ;; Don't erase all the meta info in the todo keep todo state and local tags
     (setq org-archive-save-context-info '(todo ltags))
 
-    ;; Allow subtrees with tag archive to be cycled normally
-    ;; do this so only headings in the archive file are officially "archived".
+    ;; Allow subtrees with tag archive to be cycled normally ;; do this so only headings in the archive file are officially "archived".
     ;; Use :ARCHIVE: to find old forgotten headings mark with org-expiry
     (setq org-cycle-open-archived-trees t)
     (setq org-sparse-tree-open-archived-trees t)
