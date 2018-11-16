@@ -68,7 +68,7 @@ This function should only modify configuration layer settings."
 
      ;; email client
      (mu4e :variables
-           mu4e-enable-async-operations t)
+           mu4e-enable-async-operations nil)
 
      ;; unix password manager
      pass
@@ -582,6 +582,20 @@ before packages are loaded."
   ;; helm
   (use-package helm-pass)
 
+  ;; Language tool for grammar checking
+  (add-to-list 'load-path "~/.emacs.d/")
+  (setq langtool-java-classpath "/usr/share/languagetool:/usr/share/java/languagetool/*"
+        langtool-default-language "en-US")
+  (require 'langtool)
+
+  ;; ;; add some keybindings for langtool
+  ;; (global-set-key (kbd "SPC L w") 'langtool-check)
+  ;; (global-set-key (kbd "SPC L w") 'langtool-check-done)
+  ;; (global-set-key (kbd "SPC L l") 'langtool-switch-defutl-language)
+  ;; (global-set-key (kbd "SPC L x") 'langtool-show-message-at-point)
+  ;; (global-set-key (kbd "SPC L c") 'langtool-correct-buffer)
+
+
   ;;Org
 
   (with-eval-after-load 'org
@@ -853,7 +867,7 @@ before packages are loaded."
     ;; Projectile configuration
     (with-eval-after-load 'org-agenda
       (require 'org-projectile)
-      (mapcar '(lambda (file)
+      (mapcar (lambda (file)
                  (when (file-exists-p file)
                    (push file org-agenda-files)))
               (org-projectile-todo-files)))
@@ -1029,7 +1043,25 @@ before packages are loaded."
         mu4e-view-show-images t
         mu4e-view-show-addresses t
         mu4e-sent-folder "/gmail/[Gmail]/Sent Mail"
-        mu4e-drafts-folder "/gmail/[Gmail]/Drafts")
+        mu4e-drafts-folder "/gmail/[Gmail]/Drafts"
+        ;; Gmail does this see mu4e-sent-messages behavior to configure
+        ;;for additional non gmail accounts
+        mu4e-sent-messages-behavior 'delete
+        user-mail-address "jaredwrd951@gmail.com"
+        user-full-name "Jared Ward"
+        mu4e-compose-signature
+        (concat
+         "Jared M. Ward\n"
+         "Portland, OR")
+        message-send-mail-function 'message-send-mail-with-sendmail
+        sendmail-program "/usr/bin/msmtp"
+        ;;Use the correct account context when sending mail based on the from header
+        message-sendmail-extra-arguments '("--read-envelope-from")
+        message-sendmail-f-is-evil 't
+        mu4e-attachment-dir "/home/jroddius/Download"
+        mu4e-change-filenames-when-moving t)
+
+  ;(add-hook 'message-send-mail-hook 'choose-msmtp-account)
 
   (setq mu4e-maildir-shortcuts
         '(("/gmail/primary/" . ?p)
@@ -1135,4 +1167,24 @@ This function is called at the very end of Spacemacs initialization."
  '(default ((t (:background nil))))
  '(company-tooltip-common ((t (:inherit company-tooltip :weight bold :underline nil))))
  '(company-tooltip-common-selection ((t (:inherit company-tooltip-selection :weight bold :underline nil)))))
+)
+(defun dotspacemacs/emacs-custom-settings ()
+  "Emacs custom settings.
+This is an auto-generated function, do not modify its content directly, use
+Emacs customize menu instead.
+This function is called at the very end of Spacemacs initialization."
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (evil-mc zenburn-theme zen-and-art-theme yasnippet-snippets yapfify xterm-color ws-butler winum white-sand-theme which-key web-mode web-beautify volatile-highlights vmd-mode vi-tilde-fringe uuidgen use-package underwater-theme ujelly-theme typit twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme toc-org tao-theme tangotango-theme tango-plus-theme tango-2-theme tagedit symon sunny-day-theme sudoku sublime-themes subatomic256-theme subatomic-theme string-inflection spaceline-all-the-icons spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme smeargle slim-mode shell-pop seti-theme scss-mode sass-mode reverse-theme restart-emacs rebecca-theme rainbow-delimiters railscasts-theme pyvenv pytest pyenv-mode py-isort purple-haze-theme pug-mode professional-theme prettier-js popwin planet-theme pkgbuild-mode pippel pipenv pip-requirements phpunit phpcbf php-extras php-auto-yasnippets phoenix-dark-pink-theme phoenix-dark-mono-theme persp-mode pcre2el password-generator paradox pandoc-mode pacmacs ox-twbs ox-reveal ox-pandoc ox-hugo ox-gfm overseer orgit organic-green-theme org-ref org-projectile org-present org-pomodoro org-mime org-download org-bullets org-brain open-junk-file omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme neotree naquadah-theme nameless mustang-theme multi-term mu4e-maildirs-extension mu4e-alert move-text monokai-theme monochrome-theme molokai-theme moe-theme mmm-mode minimal-theme material-theme markdown-toc majapahit-theme magit-svn magit-gitflow madhat2r-theme macrostep lush-theme lorem-ipsum live-py-mode link-hint light-soap-theme kaolin-themes jbeans-theme jazz-theme ir-black-theme inkpot-theme indent-guide importmagic impatient-mode hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation heroku-theme hemisu-theme helm-xref helm-themes helm-swoop helm-rtags helm-pydoc helm-purpose helm-projectile helm-pass helm-org-rifle helm-mu helm-mode-manager helm-make helm-gitignore helm-git-grep helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme google-translate google-c-style golden-ratio gnuplot gitignore-templates gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md gandalf-theme fuzzy frame-mode font-lock+ flyspell-popup flyspell-correct-helm flx-ido flatui-theme flatland-theme fill-column-indicator farmhouse-theme fancy-battery eziam-theme eyebrowse expand-region exotica-theme evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-org evil-numbers evil-nerd-commenter evil-matchit evil-magit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens evil-args evil-anzu eval-sexp-fu espresso-theme eshell-z eshell-prompt-extras esh-help emojify emoji-cheat-sheet-plus emmet-mode elisp-slime-nav editorconfig dumb-jump drupal-mode dracula-theme dotenv-mode doom-themes doom-modeline django-theme disaster diminish define-word darktooth-theme darkokai-theme darkmine-theme darkburn-theme dakrone-theme cython-mode cyberpunk-theme counsel-projectile company-web company-statistics company-rtags company-quickhelp company-php company-emoji company-c-headers company-auctex company-anaconda column-enforce-mode color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized clues-theme clean-aindent-mode clang-format cherry-blossom-theme centered-cursor-mode busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes aggressive-indent afternoon-theme ace-window ace-link ace-jump-helm-line ac-ispell 2048-game))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
 )
