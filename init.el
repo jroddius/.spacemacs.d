@@ -1,10 +1,11 @@
+;; [[file:~/.spacemacs.d/spacemacs.org::*Layers][Layers:1]]
 ;; -*- mode: emacs-lisp; lexical-binding: t -*-
 ;; This file is loaded by Spacemacs at startup.
 ;; It must be stored in your home directory.
 
 (defun dotspacemacs/layers ()
   "Layer configuration:
-This function should only modify configuration layer settings."
+  This function should only modify configuration layer settings."
   (setq-default
    ;; Base distribution to use. This is a layer contained in the directory
    ;; `+distribution'. For now available distributions are `spacemacs-base'
@@ -145,10 +146,10 @@ This function should only modify configuration layer settings."
    ;; Also include the dependencies as they will not be resolved automatically.
    dotspacemacs-additional-packages '(
                                       ledger-mode
+                                      flycheck-ledger
                                       frame-mode
                                       helm-pass
                                       password-store
-                                      auth-source-pass
                                       pkgbuild-mode
                                         ;<2018-09-09 Sun>;frames-only-mode
                                       )
@@ -167,7 +168,9 @@ This function should only modify configuration layer settings."
    ;; installs *all* packages supported by Spacemacs and never uninstalls them.
    ;; (default is `used-only')
    dotspacemacs-install-packages 'used-only))
+;; Layers:1 ends here
 
+;; [[file:~/.spacemacs.d/spacemacs.org::*Initialization][Initialization:1]]
 (defun dotspacemacs/init ()
   "Initialization:
 This function is called at the very beginning of Spacemacs startup,
@@ -519,7 +522,9 @@ It should only modify the values of Spacemacs settings."
    ;; visiting README.org files of Spacemacs.
    ;; (default nil)
    dotspacemacs-pretty-docs nil))
+;; Initialization:1 ends here
 
+;; [[file:~/.spacemacs.d/spacemacs.org::*dotspacemacs/user-env][dotspacemacs/user-env:1]]
 (defun dotspacemacs/user-env ()
   "Environment variables setup.
 This function defines the environment variables for your Emacs session. By
@@ -527,617 +532,981 @@ default it calls `spacemacs/load-spacemacs-env' which loads the environment
 variables declared in `~/.spacemacs.env' or `~/.spacemacs.d/.spacemacs.env'.
 See the header of this file for more information."
   (spacemacs/load-spacemacs-env))
+;; dotspacemacs/user-env:1 ends here
 
+;; [[file:~/.spacemacs.d/spacemacs.org::*dotspacemacs/user-init][dotspacemacs/user-init:1]]
 (defun dotspacemacs/user-init ()
   "Initialization for user code:
 This function is called immediately after `dotspacemacs/init', before layer
 configuration.
 It is mostly for variables that should be set before packages are loaded.
 If you are unsure, try setting them in `dotspacemacs/user-config' first."
+;; set the default outside program to use for spellchecking with flycheck.
+(setq ispell-program-name "/usr/bin/hunspell")
   )
+;; dotspacemacs/user-init:1 ends here
 
+;; [[file:~/.spacemacs.d/spacemacs.org::*dotspacemacs/user-load][dotspacemacs/user-load:1]]
 (defun dotspacemacs/user-load ()
   "Library to load while dumping.
 This function is called only while dumping Spacemacs configuration. You can
 `require' or `load' the libraries of your choice that will be included in the
 dump."
   )
+;; dotspacemacs/user-load:1 ends here
 
+;; [[file:~/.spacemacs.d/spacemacs.org::*dotspacemacs/user-config][dotspacemacs/user-config:1]]
 (defun dotspacemacs/user-config ()
   "Configuration for user code:
 This function is called at the very end of Spacemacs startup, after layer
 configuration.
 Put your configuration code here, except for variables that should be set
 before packages are loaded."
+;; dotspacemacs/user-config:1 ends here
 
-  ;; ledger-mode setup
+;; [[file:~/.spacemacs.d/spacemacs.org::*Ledger%20Mode][Ledger Mode:1]]
+;; ledger-mode setup
   (autoload 'ledger-mode "ledger-mode" "A major mode for Ledger" t)
   (add-to-list 'auto-mode-alist '("\\.ledger$" . ledger-mode))
 
 
-  ;;set the default browser for viewing links in spacemacs
-  (setq gnus-button-url 'browse-url-generic
-        browse-url-generic-program "qutebrowser"
-        browse-url-browserfunction gnus-button-url)
-
-  ;; have i3 control the windows instead of emacs
-  (defvar i3-use-frame-mode
-    (s-contains? "i3" (shell-command-to-string "wmctrl -m")))
-
-  (use-package frame-mode
-    :if i3-use-frame-mode
-    :demand t
-    :config
-    (progn
-      (add-hook 'frame-mode-hook (lambda () (display-time-mode -1)))
-      (frame-mode +1)
-      (frame-keys-mode nil)))
-
-  ;; Have Calendar always open in the same frame
-  (push '("*Calendar*" . (display-buffer-same-window display-buffer-pop-up-window)) frame-mode-display-buffer-alist)
-
-  ;;MAGIT
-  ;;Tells Magit where the git repos are for the auto-complete feature
-  (setq magit-repository-directories '("~/Programming/repos"))
-  (setq magit-refresh-status-buffer nil)
-  ;;uncomment line below for Magit SVN plugin
-  ;;(defun dotspacemacs/user-init () (setq-defult git-enable-magit-svn-plugin t))
-  ;;adds the ability to edit commits in Magit
-  (global-git-commit-mode)
-
-  ;; helm
-  (use-package helm-pass)
-
-  ;; Language tool for grammar checking
-  (add-to-list 'load-path "~/.emacs.d/")
-  (setq langtool-java-classpath "/usr/share/languagetool:/usr/share/java/languagetool/*"
-        langtool-default-language "en-US")
-  (require 'langtool)
-
-  ;; ;; add some keybindings for langtool
-  (spacemacs/set-leader-keys "SPC L" 'langtool)
-  (define-key evil-normal-state-map (kbd "SPC L w") 'langtool-check)
-  (define-key evil-normal-state-map (kbd "SPC L w") 'langtool-check-done)
-  (define-key evil-normal-state-map (kbd "SPC L l") 'langtool-switch-default-language)
-  (define-key evil-normal-state-map (kbd "SPC L x") 'langtool-show-message-at-point)
-  (define-key evil-normal-state-map (kbd "SPC L c") 'langtool-correct-buffer)
-
-
-  ;;Org
-
-  (with-eval-after-load 'org
-
-    ;; set key bindings for org here.
-    (define-key evil-normal-state-map (kbd "SPC a S") 'org-save-all-org-buffers)
-    (define-key evil-normal-state-map (kbd "SPC a O") 'org-switchb)
-    (evil-define-key 'normal org-mode-map (kbd ", O") 'org-switchb)
-    (evil-define-key 'normal org-mode-map (kbd ", S") 'org-save-all-org-buffers)
-
-    ;;set the directory where all your org files will be stored.
-    (setq org-directory "~/Documents/org")
-
-    ;;set the org journal directory here
-    (setq org-journal-dir "journal")
-    ;; set the journal file format adding extions like .org to end of format
-    ;; will break the compiler.
-    (setq org-journal-file-format "%Y-%m-%d")
-    (setq org-journal-date-prefix "")
-    (setq org-journal-date-format "%A, %B %d %Y")
-    (setq org-journal-time-prefix "* ")
-    (setq org-journal-time-format "")
-
-    ;; Set the program to open pdf files for BibTeX layer
-    (setq org-ref-open-pdf-function
-          (lambda (fpath)
-            (start-process "zathura" "*helm-bibtex-zathura" "/usr/bin/zathura" fpath)))
-    (setq org-catch-invisible-edits 'smart)
-
-    ;; Set the org default bibliography
-    (setq org-ref-default-bibliography '("~/Documents/org/References.bib")
-          org-ref-pdf-direcory "~/Documents/org"
-          org-ref-bibliography-notes "~/Documents/org/References.org::Bibliography")
-
-    ;; add different bullets to org
-    (setq org-bullets-bullet-list '("■" "○" "▶" "✿"))
-
-    ;; set org TODO keyword workflow states, here is an example
-    (setq org-todo-keywords
-          '((sequence "TODO(t)"
-                      "NEXT(n)"
-                      "DELEGATED(x@!)" "|"
-                      "CANCELLED(c@)"
-                      "DONE(d)")
-
-            (sequence "WAITING(w@!)"
-                      "|"
-                      "DISPOSED(d)")
-
-            (sequence "SOMEDAY(s)" "|"
-                      "NEVER(n)")
-
-            (sequence "REFERENCE(r)" "|"
-                      "TRASH(t)")
-
-            (sequence "EXPIRED(e)"
-                      "RESET(r)" "|"
-                      "GONE")))
-
-    ;; set the default org capture file
-    (setq org-default-notes-file "~/Documents/org/Collection.org")
-
-    ;;destroy org-capture frame after finalization
-    (defadvice org-capture-finalize
-        (after delete-capture-frame activate)
-      "Advise capture-finalize to close the frame"
-      (if (equal "Org Select" (frame-parameter nil 'name))
-          (delete-frame)))
-
-    ;; destroy org-capture frame after kill
-    (defadvice org-capture-kill
-        (after delete-capture-frame activate)
-      "Advise capture-kill to close the frame"
-      (if (equal "Org Select" (frame-parameter nil 'name))
-          (delete-frame)))
-
-    ;; Keep org capture in single window
-    (defun widen-org-capture-buffer ()
-      (interactive)
-      "Make the org capture buffer take up the entire frame"
-      (delete-other-windows))
-    (advice-add 'org-capture :after #'widen-org-capture-buffer)
-
-    ;;Set the context tags(these tags represent where something can be done)
-    (setq org-tag-alist '(("home" . ?h)
-                          ("work" . ?w)
-                          ("computer" . ?c)
-                          ("school" . ?s)
-                          ("errand" . ?e)
-                          ("trip" . ?t)
-                          ("vacation" . ?v)))
-
-    ;; set your org capture templates here
-    (setq org-capture-templates
-
-          '(("t" "General task collection and generation")
-
-            ;; General task collection not sure where to put it yet need processing
-            ("tc" "Collect tasks for processing later" entry (file "Collection.org")
-             "* TODO %? :%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:")
-
-            ;; Collect anything that takes more than two actions here.
-            ("tp" "Project tasks(two actions or more)" entry (file "Projects.org")
-             "* TODO %? [/] :%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:")
-
-            ;; Tasks with single actions
-            ("ts" "Single action tasks" entry (file+headline "myGTD.org" "Tasks")
-             "* TODO %? :%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:")
-
-            ("u" "URL Capture")
-
-            ("uu" "Capture URL and Title of current webpage for reference" entry (file "References.org")
-             "* REFERENCE %? :url::\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:\n   %(shell-command-to-string \"xsel -bo\")")
-
-            ("us" "Capture URL, Title and Selection of current webpage for reference" entry (file "References.org")
-             "* REFERENCE %? :url::\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:\n   %(shell-command-to-string \"xsel -bo\")  %x")
-
-            ("ut" "Capture URL and Title of current webpage for a \"TODO\"" entry (file "Collection.org")
-             "* TODO %? :url:%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:\n   %(shell-command-to-string \"xsel -bo\")")
-
-            ("ux" "Capture URL, Title and Selection of current webpage for a \"TODO\"" entry (file "Collection.org")
-             "* TODO %? :url:%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:\n   %(shell-command-to-string \"xsel -bo\")  %x")
-
-            ("f" "Capture file links and region text")
-
-            ("ff" "Capture a file to REFERENCE" entry (file "References.org")
-             "* REFERENCE %A :filelink:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:\n")
-
-            ;; link file to a reference entry
-            ("fs" "Capture a file+region(selection) to REFERENCE" entry (file "References.org")
-             "* REFERENCE %A\n   :filelink:PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:\n  %i\n")
-
-            ;; link file to a todo entry
-            ("ft" "Capture a file TODO" entry (file "Collection.org")
-             "* TODO %A :filelink:%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:\n %i\n")
-
-            ;; link file to a todo entry
-            ("fx" "Capture a file+region TODO" entry (file "Collection.org")
-             "* TODO %A :filelink:%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:\n %i\n")
-
-            ;; Holidays, Dentist, Doctor....
-            ("c" "Calendar(main events)" entry (file+headline "myGTD.org" "Calendar")
-             "* TODO %?\n   %^t\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:")
-
-            ;; Add all fiscal due dates here e.g. taxes, credit card payments, insurance ...
-            ("a" "Financial obligations(accounting))" entry (file+headline "myGTD.org" "financial")
-             "* TODO %? :%^{prompt|home|work|computer|school|errand}:\n\n   SCHEDULED: %^t DEADLINE: %^t\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:")
-
-            ;; Not today for whatever reason, wishes maybe here.
-            ("s" "Maybe someday?" entry (file "Someday.org")
-             "* SOMEDAY %?\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:")
-
-            ;; Capture all those things borrowed with deadlines
-            ("b" "Borrowed" entry (file+headline "myGTD.org" "Borrowed")
-             "* TODO %?\n   SCHEDULED: %^t DEADLINE: %^t\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:")
-
-            ;; Technical car stuff here
-            ("m" "Car maintenance and repair" entry (file+headline "myGTD.org" "Car Maintenance/Repair")
-             "* TODO %?\n   SCHEDULED: %^t DEADLINE: %^t\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:")
-
-            ;; This is where you put things that are waiting on other people
-            ("w" "Waiting on someone, *not me*" entry (file "Waiting.org")
-             "* WAITING %?\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:")
-
-            ;; Capture a general reference
-            ("r" "Capture a typed reference" entry (file "Reference.org")
-             "* REFERENCE %?%^G\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:")))
-
-    ;; Set my org agenda views here.
-    (setq org-agenda-custom-commands
-          '(("x" "Agenda Block View"
-             ((agenda)
-              (org-agenda-files '("~/Documents/org/myGTD.org"
-                                  "~/Documents/org/Projects.org"))))
-
-            ("n" "NEXT todos"
-             todo "NEXT")
-
-            ("y" "Appointments" agenda*)
-
-            ("c" "Computer todos"
-             ((todo "NEXT")
-              (todo "TODO"))
-             ((org-agenda-tag-filter-preset '("+computer"))
-              (org-agenda-files '("~/Documents/org/myGTD.org"
-                                  "~/Documents/org/Projects.org"))
-              (org-agenda-category-filter-preset '("-Financial"
-                                                   "-Calendar"))))
-
-            ("h" "Home todos"
-             ((todo "NEXT")
-              (todo "TODO"))
-             ((org-agenda-tag-filter-preset '("+home"))
-              (org-agenda-files '("~/Documents/org/myGTD.org"
-                                  "~/Documents/org/Projects.org"))
-              (org-agenda-category-filter-preset '("-Financial"
-                                                   "-Calendar"))))
-
-            ("w" "Work todos"
-             ((todo "NEXT")
-              (todo "TODO"))
-             ((org-agenda-tag-filter-preset '("+work"))
-              (rg-agenda-files '("~/Documents/org/myGTD.org"
-                                  "~/Documents/org/Projects.org"))
-              (org-agenda-category-filter-preset '("-Financial"
-                                                   "-Calendar"))))
-
-            ("e" "Errand todos"
-             ((todo "NEXT")
-              (todo "TODO"))
-             ((org-agenda-tag-filter-preset '("+errand"))
-              (org-agenda-files '("~/Documents/org/myGTD.org"
-                                  "~/Documents/org/Projects.org"))
-              (org-agenda-category-filter-preset '("-Financial"
-                                                   "-Calendar"))))
-
-            ("s" "School todos"
-             ((todo "NEXT")
-              (todo "TODO"))
-             ((org-agenda-tag-filter-preset '("+school"))
-              (org-agenda-files '("~/Documents/org/myGTD.org"
-                                  "~/Documents/org/Projects.org"))
-              (org-agenda-category-filter-preset '("-Financial"
-                                                   "-Calendar"))))
-
-            ("i" "Collection"
-             todo "TODO"
-             ((org-agenda-files '("~/Documents/org/Collection.org"))))
-
-            ("r" "References"
-             todo "REFERENCE"
-             ((org-agenda-files '("~/Documents/org/References.org"))))
-
-            ("o" "Someday"
-             ((tags "NEXT")
-              (todo "SOMEDAY"))
-             ((org-agenda-files '("~/Documents/org/Someday.org"))))
-
-            ("v" "Waiting"
-             todo "WAITING"
-             ((org-agenda-files '("~/Documents/org/Waiting.org"))))
-
-            ("R" "What to read?"
-             ((tags "NEXT")
-              (todo "TODO"))
-             ((org-agenda files '("~/Documents/org/Read.org"))))))
-
-    ;; Change todo to done when all of it's children are finished
-    (defun org-summary-todo (n-done n-not-done)
-      "Switch entry to DONE when all subentries are done, to TODO otherwise."
-      (let (org-log_done org-log-states) ;turn off logging
-        (org-todo (if (= n-not-done 0) "DONE" "TODO"))))
-
-    ;; this is the hook that makes the todo change from the above.
-    (add-hook 'org-after-todo-statistics-hook 'org-summary-todo)
-
-    ;; set to nil to make org statistics cookie count todo entries in subtrees not
-    ;; just direct children.
-    (setq org-hierarchical-todo-statistics nil)
-
-    ;;set the defautlt location for agenda files
-    (setq org-agenda-files '("~/Documents/org/myGTD.org"
-                             "~/Documents/org/Projects.org"
-                             "~/Documents/org/Collection.org"
-                             "~/Documents/org/Read.org"
-                             "~/Documents/org/Someday.org"
-                             "~/Documents/org/References.org"))
-
-    ;; Projectile configuration
-    (with-eval-after-load 'org-agenda
-      (require 'org-projectile)
-      (mapcar (lambda (file)
-                 (when (file-exists-p file)
-                   (push file org-agenda-files)))
-              (org-projectile-todo-files)))
-
-    
-
-    (defun my/org-projectile-project-todo-at-point()
-      (interactive)
-      (setq org-projectile-capture-template "* TODO %A :%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:")
-      (org-projectile-capture-for-current-project)
-      (setq org-projectile-capture-template  "* TODO %? :%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:"))
-
-    (setq org-projectile-capture-template  "* TODO %? :%^{prompt|home|work|computer|school|errand}:\n   :PROPERTIES:\n   :CREATED:  %U\n   :EXPIRY:   +1y\n   :END:")
-
-    ;; org-projectile keybindings go here
-    (global-set-key (kbd "C-c n p") 'org-projectile-project-todo-completing-read)
-    (global-set-key (kbd "C-c n P") 'org-projectile-capture-for-current-project)
-    (evil-define-key 'normal projectile-mode-map (kbd "C-c n a") 'my/org-projectile-project-todo-at-point)
-
-    ;; set the default location to store done tasks
-    ;; (setq org-archive-location "archive.org::")
-
-    ;; Don't erase all the meta info in the todo keep todo state and local tags
-    (setq org-archive-save-context-info '(todo ltags))
-
-    ;; Allow subtrees with tag archive to be cycled normally ;; do this so only headings in the archive file are officially "archived".
-    ;; Use :ARCHIVE: to find old forgotten headings mark with org-expiry
-    (setq org-cycle-open-archived-trees t)
-    (setq org-sparse-tree-open-archived-trees t)
-    (setq org-agenda-skip-archived-trees nil)
-    (setq org-columns-skip-archived-trees nil)
-    (setq org-export-with-archived-trees t)
-
-    ;;Function for exporting odt files from org files
-    (defun my/org-export-to-odt-and-open ()
-      (interactive)
-      (org-open-file (org-odt-export-to-odt)))
-
-    ;; This function moves all "DONE" "SOMEDAY" "WAITING" "TODO"s in agenda files to corresponding org files
-    ;; (defun my/org-archive-multi-tasks ()
-    ;;   (interactive)
-    ;;   (loop for (lowercase-todo-type  uppercase-todo-type) in '(("Trash" "/GONE")
-    ;;                                                             ("Trash" "/TRASH")
-    ;;                                                             ("Trash" "/DISPOSED")
-    ;;                                                             ("Trash" "/CANCELLED")
-    ;;                                                             ("Waiting" "/WAITING")
-    ;;                                                             ("Delegated" "/DELEGATED"))
-
-    ;;         ;; Create string with variables to set org-archive-location
-    ;;         do (setq org-archive-location (concat lowercase-todo-type ".org::"))
-    ;;         (setq org-collection-file-list '("~/Documents/org/myGTD.org"
-    ;;                                          "~/Documents/org/Collection.org"
-    ;;                                          "~/Documents/org/References.org"
-    ;;                                          "~/Documents/org/Someday.org"))
-
-    ;;         (org-map-entries
-    ;;          (lambda ()
-    ;;            (org-archive-subtree)
-    ;;            (setq org-map-continue-from (outline-previous-heading)))
-    ;;          uppercase-todo-type org-collection-file-list))
-
-    ;;   (setq org-archive-location '%s_archive::))
-
-    ;; set autofill in org-mode for word processor like wordwrap functionality.
-    (add-hook 'org-mode-hook
-              (lambda ()
-                ;; Enable fill column indicator
-                (fci-mode t)
-                ;; Set fill column to whatever you want
-                (setq fill-column 80)
-                ;;enable automatic line wrapping at fill column
-                (auto-fill-mode t)
-                (flyspell-mode 1)))
-
-    ;; Set up org-refile targets here
-    (setq org-refile-targets (quote (("myGTD.org::Tasks" :level . 1)
-                                     ("myGTD.org::Financial" :level . 1)
-                                     ("myGTD.org::Calendar" :level . 1)
-                                     ("myGTD.org::Car Maintenance/Repair" :level . 1)
-                                     ("Projects.org" :maxlevel . 1)
-                                     ("Someday.org" :level . 0)
-                                     ("Waiting.org" :level . 0)
-                                     ("References.org" :level . 0)
-                                     ("Delegated.org" :level . 0)
-                                     ("Read.org" :level . 0))))
-
-    ;; set to nil so org refile shows all possible targets in helm at one time
-    (setq org-outline-path-complete-in-steps nil)
-
-    ;; Set to true to allow org-refile to create new nodes as new parents in org files.
-    (setq org-refile-allow-creating-parent-nodes t)
-    (setq org-refile-use-outline-path 'file)
-
-    ;;Org-crypt (setq org-tags-exclude-from-inheritance (quote ("crypt")))
-    ;; Todo I need to set this key up and pinentry
-    (setq org-crypt-key "emacs-journal")
-    ;; GPG key to use for encryption
-    ;; Either the key id or set to nil to use symmetric encryption
-    ;; Attention must add:
-    ;; # -*- buffer-auto-save-file-name: nil; -*-
-    ;; to top of org files with encryption or youll get an
-    ;; annoying message. You could also turn off auto save globally like this:
-    ;; (setq auto-save-default nil)
-
-    (defun my/org-expiry-delete-archive-reset ()
-      (interactive "c/Delete, Archive, Reset:"
-                   (cond ((char-equal ?D my-expiry-choice)
-                          '(org-cut-subtree))
-                         ((char-equal ?d my-expiry-choice)
-                          '(org-cut-subtree))
-                         ((char-equal ?A my-expiry-choice)
-                          '(org-archive-subtree))
-                         ((char-equal ?a my-expiry-choice)
-                          '(org-archive-subtree))
-                         ((char-equal ?R my-expiry-choice)
-                          '(org-expiry-insert-created))
-                         ((char-equal ?r my-expiry-choice)
-                          '(org-expiry-insert-created &optional t))
-                         (t (message "Unrecognized option bad char!")))))
-
-    ;; Create a variable for the expiry property
-    (setq org-expiry-expiry-property-name "EXPIRY")
-
-    ;; Set the function to run when calling org-expiry
-    (setq org-expiry-handler-function 'org-expiry-add-keyword)
-
-    ;; "create" help r function for my/org-expiry-add-timestamp-1y-expiry ()
-    (defun my/org-expiry-helper-insert-create ()
-      (interactive)
-      (save-excursion
-        (org-back-to-heading)
-        (org-expiry-insert-created)))
-
-    ;; "insert" helper function for my/org-expiry-add-timestamp-1y-expiry ()
-    (defun my/org-expiry-helper-insert-expiry ()
-      (save-excursion
-        (org-entry-put
-         (point) org-expiry-expiry-property-name timestr)))
-
-    ;; Add expiry mechanism to emacs items will expire in one year at which time
-    ;; you may check for expired entries with M-x org-expiry-process-entries.
-    (defun my/org-expiry-add-timestamp-1y-expiry ()
-      (interactive)
-      (save-excursion
-        (when (string= (org-get-todo-state) "TODO")
-          (let* ((d (org-entry-get (point) org-expiry-expiry-property-name)))
-            (setq timestr "1y")
-            (my/org-expiry-helper-insert-create)
-            (my/org-expiry-helper-insert-expiry)))))
-
-    ;; Set timestamps inactive so everything doesn't show up in the agenda
-    (setq org-expiry-inactive-timestamps t)
-
-    (add-hook 'org-after-todo-state-change-hook 'my/org-expiry-add-timestamp-1y-expiry)
-
-    ;; Add hook to insert timestamp when todo state is changed the heading is set to "TODO"
-
-    ;; Make org treat isert of todo as state change
-    ;; so that org-expire will automatically insert
-    ;; a "CREATED" "EXPIRED" tag.
-    (setq org-treat-insert-todo-heading-as-state-change t)
-
-    ;; Set the amount of days org should start warning you before a deadline
-    (setq org-deadline-warning-days 2)
-
-    ;; Don't show scheduled items that are already "DONE".
-    (setq org-agenda-skip-scheduled-if-done t)
-    (setq org-agenda-skip-deadline-if-done t)
-    (setq org-agenda-skip-timestamp-if-done t))
-
-  (setq mu4e-maildir "~/.mail"
-        mu4e-trash-folder "/gmail/[Gmail]/Trash"
-        mu4e-refile-folder "/gmail/email_archive"
-        mu4e-get-mail-command "mbsync -a"
-        mu4e-update-interval nil
-        mu4e-compose-signature-auto-include t
-        mu4e-view-show-images t
-        mu4e-view-show-addresses t
-        mu4e-sent-folder "/gmail/[Gmail]/Sent Mail"
-        mu4e-drafts-folder "/gmail/[Gmail]/Drafts"
-        ;; Gmail does this see mu4e-sent-messages behavior to configure
-        ;;for additional non gmail accounts
-        mu4e-sent-messages-behavior 'delete
-        user-mail-address "jaredwrd951@gmail.com"
-        user-full-name "Jared Ward"
-        mu4e-compose-signature
-        (concat
-         "Jared M. Ward\n"
-         "Portland, OR")
-        message-send-mail-function 'message-send-mail-with-sendmail
-        sendmail-program "/usr/bin/msmtp"
-        ;;Use the correct account context when sending mail based on the from header
-        message-sendmail-extra-arguments '("--read-envelope-from")
-        message-sendmail-f-is-evil 't
-        mu4e-attachment-dir "/home/jroddius/Download"
-        mu4e-change-filenames-when-moving t)
-
-  ;(add-hook 'message-send-mail-hook 'choose-msmtp-account)
-
-  (setq mu4e-maildir-shortcuts
-        '(("/gmail/primary/" . ?p)
-          ("/gmail/promotions/" . ?P)
-          ("/gmail/social_email/" . ?s)
-          ("/gmail/forums_email/" . ?f)
-          ("/gmail/Family/" . ?F)
-          ("/gmail/Work/" . ?w)
-          ("/gmail/email_updates/" . ?u)
-          ("/gmail/[Gmail]/Drafts/" . ?d)
-          ("/gmail/[Gmail]/Sent Mail/" . ?S)
-          ("/gmail/[Gmail]/Spam/" . ?!)
-          ("/gmail/[Gmail]/Trash/" . ?t)))
-
-  ;; auto-completion
-  ;; make company the global auto-completion plugin
-  (global-company-mode)
-
-  ;;configures nicer looking faces for auto-completion
-  (custom-set-faces
-   '(company-tooltip-common
-     ((t (:inherit company-tooltip :weight bold :underline nil))))
-   '(company-tooltip-common-selection
-     ((t (:inherit company-tooltip-selection :weight bold :underline nil)))))
-
-  ;;set the delay of autocompletion here 0 means instant
-  (setq company-idle-delay 0)
-
-  ;;Arch linux
-  ;;Add a pkgbuild mode for Arch linux packages
-  (use-package pkgbuild-mode)
-
-  ;;Latex
-  ;;Auto update pdf preview when file recompiled
-  (add-hook 'doc-view-mode-hook 'auto-revert-mode)
-
-  ;; Theming set backgound theme so terminal mode is transparent
-  (defun set-background-for-terminal (&optional frame)
-    (or frame (setq frame (selected-frame)))
-    "unsets the background color in terminal mode"
-    (if (display-graphic-p frame)
-        (spacemacs/enable-transparency) (set-face-background 'default "unspecified-bg" frame)))
-  (add-hook 'after-make-frame-functions 'set-background-for-terminal)
-  (add-hook 'window-setup-hook 'set-background-for-terminal)
-
-  ;; fix for pdf-tools auto revert specified by author https://github.com/politza/pdf-tools#known-problems
-  (add-hook 'Tex-after-compilation-finished-function #'Tex-revert-document-buffer)
-
-  ;; open buffers in emacs automatically
-  (find-file-noselect "~/Documents/org/myGTD.org")
-  (find-file-noselect "~/Documents/org/Projects.org")
-  (find-file-noselect "~/Documents/org/Collection.org")
-  (find-file-noselect "~/Documents/org/References.org")
-  (find-file-noselect "~/Documents/org/Read.org")
-  (find-file-noselect "~/Documents/org/Delegated.org")
-  (find-file-noselect "~/Documents/org/Waiting.org")
-  (find-file-noselect "~/Documents/org/Someday.org")
-
-  ;; Set defaul browser for emacs to call
-  (setq browse-url-browser-function 'browse-url-generic
-        browse-url-generic-program "qutebrowser")
-
-  ;; Spaceline configuration
-  )
-
+  (add-hook 'ledger-mode-hook
+            (lambda ()
+              (setq yas-indent-line "fixed")
+              (my/ledger-create-list-of-accounts-for-each-type)
+              (my/ledger-create-payee-list)))
+
+  ;; Set this to a file containing or naming all ledger accounts
+  (setq ledger-accounts-file "~/Documents/org/Personal.ledger")
+
+  ;; Created with ledger-accounts-list
+  (defun my/ledger-create-payee-list ()
+    "Return a list of all known payee names as strings.
+Looks in `ledger-accounts-file' if set, otherwise the current buffer."
+    (interactive)
+    (setq my/ledger-payee-list
+          (if ledger-accounts-file
+              (let ((f ledger-accounts-file))
+                (with-temp-buffer
+                  (insert-file-contents f)
+                  (my/ledger-payees-list-in-buffer)))
+            (my/ledger-payees-list-in-buffer))))
+
+  ;;Created with ledger-account-list-in-buffer
+  (defun my/ledger-payees-list-in-buffer ()
+    "Return a list of all known payee names in the current buffer as strings."
+    (save-excursion
+      (goto-char (point-min))
+      (let (results)
+        (while (re-search-forward ledger-payee-any-status-regex nil t)
+          (setq results (cons (match-string-no-properties 3) results)))
+        (ledger-accounts-deduplicate-sorted
+         (sort results #'ledger-string-greaterp)))))
+
+  (defun my/ledger-get-payee-account-name ()
+    "Get the name of the payee for the ledger transaction and append to list if
+not present additions to list will not be available after emacs is restarted.
+Update the ledger-accounts-file to make addition permanent"
+    (interactive)
+    (let ((payee (message "%s" (helm-comp-read "What is the name of the Payee? " my/ledger-payee-list :fuzzy t))))
+      (add-to-list 'my/ledger-payee-list payee)
+      (setq my/ledger-payee-account-name payee)))
+
+  (defun my/ledger-how-much-are-you-paying ()
+    "Get the amount that is to be paid in the ledger transaction"
+    (message "%s" (read-string "How much money would you like to pay? ")))
+
+  (defun my/ledger-get-account-list-by-type-regexp (account)
+    "Get account list by type using the pass regular expression passed to 'account'"
+    (let ((value)
+          (list (ledger-accounts-list)))
+      (dolist (element list value)
+        (if (string-match account element)
+            (setq value (cons element value))))))
+
+  ;; Set ledger account types list and list variable names
+  (setq my/list-of-account-types '(("Expenses" . "my/ledger-expenses-account-name-list")
+                                   ("Assets" . "my/ledger-assets-account-name-list")
+                                   ("Liabilities" . "my/ledger-liabilities-account-name-list")
+                                   ("Income" . "my/ledger-income-account-name-list")
+                                   ("Equity" . "my/ledger-equity-account-name-list")))
+
+  (defun my/ledger-return-org-capture-expenses-string ()
+    (interactive)
+    (concatenate 'string "#+begin_src ledger :tangle register.ledger\n"
+                 (format-time-string "%Y/%m/%d" (current-time)) " " my/ledger-payee-account-name "\n  "
+                 (my/ledger-get-expenses-account-name)
+                 "                                 "
+                 (my/ledger-how-much-are-you-paying) "\n  "
+                 (my/ledger-get-payment-account-name) "\n"
+                 "#+end_src"))
+
+  (defun my/ledger-return-org-capture-assets-string ()
+    (interactive)
+    (concatenate 'string "#+begin_source ledger :tangle register.ledger\n"
+                 (format-time-string "%Y/%m/%d" (current-time)) " " my/ledger-get-payee-account-name "\n  "
+                 (my/ledger-get-assets-account-name)
+                 "                                 "
+                 (my/ledger-how-much-are-you-paying) "\n  "
+                 (my/ledger-get-income-assets-liabilities-account-name) "\n"
+                 "#+end_src"))
+
+  (defun my/ledger-return-org-capture-liabilities-string ()
+    (interactive)
+    (concatenate 'string "#+begin_source ledger :tangle register.ledger\n"
+                 (format-time-string "%Y/%m/%d" (current-time)) " " my/ledger-get-payee-account-name "\n  "
+                 (my/ledger-get-liabilities-account-name)
+                 "                                 "
+                 (my/ledger-how-much-are-you-paying) "\n  "
+                 (my/ledger-get-payment-account-name) "\n"
+                 "#+end_src"))
+
+
+  (defun my/ledger-insert-yasnippet-template ()
+    (interactive)
+    (evil-open-below 1)
+    (evil-escape)
+    (evil-digit-argument-or-evil-beginning-of-line)
+    (my/ledger-get-payee-account-name)
+    (yas-insert-snippet))
+
+  (defun my/ledger-create-list-of-accounts-for-each-type ()
+    "Return a list for each account in the accounts type list"
+    (interactive)
+    (dolist (type my/list-of-account-types)
+      (set (intern (cdr type))
+           (my/ledger-get-account-list-by-type-regexp (car type)))))
+
+  (defun my/ledger-get-account-name-completion (account-list prompt)
+    "Get an account name using regexp with completion"
+    (message "%s" (ido-completing-read prompt account-list)))
+
+  (defun my/ledger-get-expenses-account-name ()
+    "Use completing and return an expense account name"
+    (interactive)
+    (let ((expense (message "%s" (helm-comp-read "What are you paying for? " my/ledger-expenses-account-name-list :fuzzy t))))
+      (add-to-list 'my/ledger-expenses-account-name-list expense)
+      (setq my/ledger-expenses-account-name expense)))
+
+  (defun my/ledger-get-equity-account-name ()
+    "Use completing and return an equity account name"
+    (interactive)
+    (let ((equity (message "%s" (helm-comp-read "Pick an equity account? " my/ledger-equity-account-name-list :fuzzy t))))
+      (add-to-list 'my/ledger-equity-account-name-list equity)
+      (setq my/ledger-equity-account-name expense)))
+
+  (defun my/ledger-get-assets-account-name ()
+    "Use completing and return an assets account name"
+    (interactive)
+    (let ((assets (message "%s" (helm-comp-read "Pick an asset? " my/ledger-assets-account-name-list :fuzzy t))))
+      (add-to-list 'my/ledger-assets-account-name-list assets)
+      (setq my/ledger-assets-account-name assets)))
+
+  (defun my/ledger-get-liabilities-account-name ()
+    "Use completing and return a liabilities account name"
+    (interactive)
+    (let ((liabilities (message "%s" (helm-comp-read "Pick an asset? " my/ledger-liabilities-account-name-list :fuzzy t))))
+      (add-to-list 'my/ledger-liabilities-account-name-list liabilities)
+      (setq my/ledger-liabilities-account-name liabilities)))
+(setq debug-on-error t)
+(defun my/ledger-get-payment-account-name ()
+  "Use completing and return a payment account name"
+  (interactive)
+  (let ((payment-list (append my/ledger-assets-account-name-list
+                              my/ledger-liabilities-account-name-list)))
+    (let ((payment (message "%s" (helm-comp-read "Pick an asset? " payment-list :fuzzy t))))
+      (setq my/ledger-payment-account-name payment))))
+
+  (defun my/ledger-get-income-assets-liabilities-account-name ()
+    "Use completing and return a income, assets and liabilities account name"
+    (interactive)
+    (let ((payment-list (append my/ledger-income-account-name-list
+                                my/ledger-assets-account-name-list
+                                my/ledger-liabilities-account-name-list)))
+          (let ((payment (message "%s" (helm-comp-read "Pick an asset, income, or liability: " payment-list :fuzzy t))))
+      (setq my/ledger-income-assets-liabilities-account-name payment))))
+;; Ledger Mode:1 ends here
+
+;; [[file:~/.spacemacs.d/spacemacs.org::*default%20variables][default variables:1]]
+;;set the default browser for viewing links in spacemacs
+(setq gnus-button-url 'browse-url-generic
+      browse-url-generic-program "qutebrowser"
+      browse-url-browserfunction gnus-button-url)
+;; default variables:1 ends here
+
+;; [[file:~/.spacemacs.d/spacemacs.org::*frame-mode][frame-mode:1]]
+;; have i3 control the windows instead of emacs
+(defvar i3-use-frame-mode
+  (s-contains? "i3" (shell-command-to-string "wmctrl -m")))
+
+(use-package frame-mode
+  :if i3-use-frame-mode
+  :demand t
+  :config
+  (progn
+    (add-hook 'frame-mode-hook (lambda () (display-time-mode -1)))
+    (frame-mode +1)
+    (frame-keys-mode nil)))
+
+;; Have Calendar always open in the same frame
+(push '("*Calendar*" . (display-buffer-same-window display-buffer-pop-up-window)) frame-mode-display-buffer-alist)
+;; frame-mode:1 ends here
+
+;; [[file:~/.spacemacs.d/spacemacs.org::*Magit][Magit:1]]
+;;Tells Magit where the git repos are for the auto-complete feature
+(setq magit-repository-directories '("~/Programming/repos"))
+(setq magit-refresh-status-buffer nil)
+;;uncomment line below for Magit SVN plugin
+;;(defun dotspacemacs/user-init () (setq-defult git-enable-magit-svn-plugin t))
+;;adds the ability to edit commits in Magit
+(global-git-commit-mode)
+;; Magit:1 ends here
+
+;; [[file:~/.spacemacs.d/spacemacs.org::*helm][helm:1]]
+(use-package helm-pass)
+;; helm:1 ends here
+
+;; [[file:~/.spacemacs.d/spacemacs.org::*langtool][langtool:1]]
+;; Language tool for grammar checking
+(add-to-list 'load-path "~/.emacs.d/")
+(setq langtool-java-classpath "/usr/share/languagetool:/usr/share/java/languagetool/*"
+      langtool-default-language "en-US")
+(require 'langtool)
+
+;; ;; add some keybindings for langtool
+(spacemacs/set-leader-keys "SPC L" 'langtool)
+(define-key evil-normal-state-map (kbd "SPC L w") 'langtool-check)
+(define-key evil-normal-state-map (kbd "SPC L w") 'langtool-check-done)
+(define-key evil-normal-state-map (kbd "SPC L l") 'langtool-switch-default-language)
+(define-key evil-normal-state-map (kbd "SPC L x") 'langtool-show-message-at-point)
+(define-key evil-normal-state-map (kbd "SPC L c") 'langtool-correct-buffer)
+;; langtool:1 ends here
+
+;; [[file:~/.spacemacs.d/spacemacs.org::*org-mode][org-mode:1]]
+(with-eval-after-load 'org
+
+             (setq org-src-tab-acts-natively t)
+             ;; set key bindings for org here.
+             (define-key evil-normal-state-map (kbd "SPC a S") 'org-save-all-org-buffers)
+             (define-key evil-normal-state-map (kbd "SPC a O") 'org-switchb)
+
+             (evil-define-key 'normal org-mode-map (kbd ", O") 'org-switchb)
+             (evil-define-key 'normal org-mode-map (kbd ", S") 'org-save-all-org-buffers)
+             (evil-define-key 'normal org-mode-map (kbd ", b m") 'org-edit-src-code)
+
+             ;;set the directory where all your org files will be stored.
+             (setq org-directory "~/Documents/org")
+
+             ;; Org babel settings
+             (org-babel-do-load-languages
+              'org-babel-load-languages
+              '((R . t)
+                (emacs-lisp .t)
+                (gnuplot . t)
+                (latex . t)
+                (ledger . t)
+                (python . t)))
+
+
+             (defun my/babel-personal-ledger-file ()
+               "Use org-babel to create ledger file"
+               (interactive)
+               (org-babel-tangle-file "~/Documents/org/register.ledger.org")
+               (shell-command "cat ~/Documents/org/accounts.temp.ledger ~/Documents/org/register.ledger ~/Documents/org/register.temp.ledger > ~/Documents/org/Personal.ledger"))
+
+             ;;set the org journal directory here
+             (setq org-journal-dir "journal")
+             ;; set the journal file format adding extions like .org to end of format
+             ;; will break the compiler.
+             (setq org-journal-file-format "%Y-%m-%d")
+             (setq org-journal-date-prefix "")
+             (setq org-journal-date-format "%A, %B %d %Y")
+             (setq org-journal-time-prefix "* ")
+             (setq org-journal-time-format "")
+
+             ;; Set the program to open pdf files for BibTeX layer
+             (setq org-ref-open-pdf-function
+                   (lambda (fpath)
+                     (start-process "zathura" "*helm-bibtex-zathura" "/usr/bin/zathura" fpath)))
+             (setq org-catch-invisible-edits 'smart)
+
+             ;; Set the org default bibliography
+             (setq org-ref-default-bibliography '("~/Documents/org/References.bib")
+                   org-ref-pdf-direcory "~/Documents/org"
+                   org-ref-bibliography-notes "~/Documents/org/References.org::Bibliography")
+
+             ;; add different bullets to org
+             (setq org-bullets-bullet-list '("■" "○" "▶" "✿"))
+
+             ;; set org TODO keyword workflow states, here is an example
+             (setq org-todo-keywords
+                   '((sequence "TODO(t)"
+                               "NEXT(n)"
+                               "DELEGATED(x@!)" "|"
+                               "CANCELLED(c@)"
+                               "DONE(d)")
+
+                     (sequence "WAITING(w@!)"
+                               "|"
+                               "DISPOSED(d)")
+
+                     (sequence "SOMEDAY(s)" "|"
+                               "NEVER(n)")
+
+                     (sequence "REFERENCE(r)" "|"
+                               "TRASH(t)")
+
+                     (sequence "EXPIRED(e)"
+                               "RESET(r)" "|"
+                               "GONE")))
+
+             ;; set the default org capture file
+             (setq org-default-notes-file "~/Documents/org/Collection.org")
+
+             ;;destroy org-capture frame after finalization
+             (defadvice org-capture-finalize
+                 (after delete-capture-frame activate)
+               "Advise capture-finalize to close the frame"
+               (if (equal "Org Select" (frame-parameter nil 'name))
+                   (delete-frame)))
+
+             ;; destroy org-capture frame after kill
+             (defadvice org-capture-kill
+                 (after delete-capture-frame activate)
+               "Advise capture-kill to close the frame"
+               (if (equal "Org Select" (frame-parameter nil 'name))
+                   (delete-frame)))
+
+             ;; Keep org capture in single window
+             (defun widen-org-capture-buffer ()
+               (interactive)
+               "Make the org capture buffer take up the entire frame"
+               (delete-other-windows))
+             (advice-add 'org-capture :after #'widen-org-capture-buffer)
+
+             ;;Set the context tags(these tags represent where something can be done)
+             (setq org-tag-alist '(("home" . ?h)
+                                   ("work" . ?w)
+                                   ("computer" . ?c)
+                                   ("school" . ?s)
+                                   ("errand" . ?e)
+                                   ("trip" . ?t)
+                                   ("vacation" . ?v)))
+
+             ;; set your org capture templates here
+             (setq org-capture-templates
+
+                   '(("t" "General task collection and generation")
+
+                     ;; General task collection not sure where to put it yet need processing
+                     ("tc" "Collect tasks for processing later" entry (file "Collection.org")
+                      "* TODO %? :%^{prompt|home|work|computer|school|errand}:
+   :PROPERTIES:
+   :CREATED:  %U   :EXPIRY:   +1y
+   :END:")
+
+                     ;; Collect anything that takes more than two actions here.
+                     ("tp" "Project tasks(two actions or more)" entry (file "Projects.org")
+                      "* TODO %? [/] :%^{prompt|home|work|computer|school|errand}:
+   :PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :END:")
+
+                     ;; Tasks with single actions
+                     ("ts" "Single action tasks" entry (file+headline "myGTD.org" "Tasks")
+                      "* TODO %? :%^{prompt|home|work|computer|school|errand}:
+   :PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :END:")
+
+                     ("u" "URL Capture")
+
+                     ("uu" "Capture URL and Title of current webpage for reference" entry (file "References.org")
+                      "* REFERENCE %? :url::
+   :PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :END:
+   %(shell-command-to-string \"xsel -bo\")")
+
+                     ("us" "Capture URL, Title and Selection of current webpage for reference" entry (file "References.org")
+                      "* REFERENCE %? :url::
+   :PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :END:
+   %(shell-command-to-string \"xsel -bo\")  %x")
+
+                     ("ut" "Capture URL and Title of current webpage for a \"TODO\"" entry (file "Collection.org")
+                      "* TODO %? :url:%^{prompt|home|work|computer|school|errand}:
+   :PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :END:
+   %(shell-command-to-string \"xsel -bo\")")
+
+                     ("ux" "Capture URL, Title and Selection of current webpage for a \"TODO\"" entry (file "Collection.org")
+                      "* TODO %? :url:%^{prompt|home|work|computer|school|errand}:
+   :PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :END:
+   %(shell-command-to-string \"xsel -bo\")  %x")
+
+                     ("f" "Capture file links and region text")
+
+                     ("ff" "Capture a file to REFERENCE" entry (file "References.org")
+                      "* REFERENCE %A :filelink:
+   :PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :END:
+")
+
+                     ;; link file to a reference entry
+                     ("fs" "Capture a file+region(selection) to REFERENCE" entry (file "References.org")
+                      "* REFERENCE %A
+   :filelink:PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :END:
+  %i
+")
+
+                     ;; link file to a todo entry
+                     ("ft" "Capture a file TODO" entry (file "Collection.org")
+                      "* TODO %A :filelink:%^{prompt|home|work|computer|school|errand}:
+   :PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :END:
+ %i
+")
+
+                     ;; link file to a todo entry
+                     ("fx" "Capture a file+region TODO" entry (file "Collection.org")
+                      "* TODO %A :filelink:%^{prompt|home|work|computer|school|errand}:
+   :PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :END:
+ %i
+")
+
+                     ;; Holidays, Dentist, Doctor....
+                     ("c" "Calendar(main events)" entry (file+headline "myGTD.org" "Calendar")
+                      "* TODO %?
+   %^t
+   :PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :END:")
+
+                     ;;Add all fiscal due dates here e.g. taxes, credit card payments, insurance ...
+                     ("a" "Accounting")
+
+                     ("ap" "Personal Account")
+
+                     ("ape" "Input Expenses" entry (file "~/Documents/org/register.ledger.org")
+                      "* TODO %(my/ledger-get-payee-account-name)
+     :PROPERTIES:
+     :CREATED:  %U
+     :EXPIRY:   +1y
+     :END:
+
+%(my/ledger-return-org-capture-expenses-string)")
+
+                     ("apa" "Input Assets" entry (file "~/Documents/org/register.ledger.org")
+                      "* TODO %(my/ledger-get-payee-account-name)
+     :PROPERTIES:
+     :CREATED:  %U
+     :EXPIRY:   +1y
+     :END:
+
+%(my/ledger-return-org-capture-assets-string)")
+
+                     ("apl" "Input Liabilities" entry (file "~/Documents/org/register.ledger.org")
+                      "* TODO %(my/ledger-get-payee-account-name)
+     :PROPERTIES:
+     :CREATED:  %U
+     :EXPIRY:   +1y
+     :END:
+
+%(my/ledger-return-org-capture-liabilities-string)")
+
+                     ("aps" "Schedule a transaction")
+
+                     ("apse" "Expenses" entry (file "~/Documents/org/deadline.ledger.org")
+                      "* TODO %(my/ledger-get-payee-account-name) :%^{prompt|home|work|computer|school|errand}:
+   DEADLINE: %^t
+   :PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :END:
+
+%(my/ledger-return-org-capture-expenses-string")
+
+                     ("apsa" "Assets" entry (file "~/Documents/org/deadline.ledger.org")
+                      "* TODO %(my/ledger-get-payee-account-name) :%^{prompt|home|work|computer|school|errand}:
+   : %^t
+   :PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :END:
+
+%(my/ledger-return-org-capture-assets-string")
+
+                     ("apsl" "Liabilities" entry (file "~/Documents/org/deadline.ledger.org")
+                      "* TODO %(my/ledger-get-payee-account-name) :%^{prompt|home|work|computer|school|errand}:
+   : %^t
+   :PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :END:
+
+%(my/ledger-return-org-capture-liabilities-string")
+
+                      ;; Not today for whatever reason, wishes maybe here.
+                      ("s" "Maybe someday?" entry (file "Someday.org")
+                       "* SOMEDAY %?
+   :PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :END:")
+
+                      ;; Capture all those things borrowed with deadlines
+                      ("b" "Borrowed" entry (file+headline "myGTD.org" "Borrowed")
+                       "* TODO %?
+   SCHEDULED: %^t DEADLINE: %^t
+   :PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :END:")
+
+                      ;; Technical car stuff here
+                      ("m" "Car maintenance and repair" entry (file+headline "myGTD.org" "Car Maintenance/Repair")
+                       "* TODO %?
+   SCHEDULED: %^t DEADLINE: %^t
+   :PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :END:")
+
+                      ;; This is where you put things that are waiting on other people
+                      ("w" "Waiting on someone, *not me*" entry (file "Waiting.org")
+                       "* WAITING %?
+   :PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :END:")
+
+                      ;; Capture a general reference
+                      ("r" "Capture a typed reference" entry (file "Reference.org")
+                       "* REFERENCE %?%^G
+   :PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :END:")))
+
+              (setq org-capture-templates
+                    (append '(("l" "Ledger entries")
+                              ("lc" "Cash" plain
+                               (file "~/Documents/journal.ledger")
+                               (function return-capture-expense-template-also)
+                               (function return-capture-expense-template)
+                               :empty-lines-before 1
+                               :empty-lines-after 1))
+                            org-capture-templates))
+
+              ;; Set my org agenda views here.
+              (setq org-agenda-custom-commands
+                    '(("x" "Agenda Block View"
+                       ((agenda)
+                        (org-agenda-files '("~/Documents/org/myGTD.org"
+                                            "~/Documents/org/Projects.org"))))
+
+                      ("n" "NEXT todos"
+                       todo "NEXT")
+
+                      ("y" "Appointments" agenda*)
+
+                      ("c" "Computer todos"
+                       ((todo "NEXT")
+                        (todo "TODO"))
+                       ((org-agenda-tag-filter-preset '("+computer"))
+                        (org-agenda-files '("~/Documents/org/myGTD.org"
+                                            "~/Documents/org/Projects.org"))
+                        (org-agenda-category-filter-preset '("-Financial"
+                                                             "-Calendar"))))
+
+                      ("h" "Home todos"
+                       ((todo "NEXT")
+                        (todo "TODO"))
+                       ((org-agenda-tag-filter-preset '("+home"))
+                        (org-agenda-files '("~/Documents/org/myGTD.org"
+                                            "~/Documents/org/Projects.org"))
+                        (org-agenda-category-filter-preset '("-Financial"
+                                                             "-Calendar"))))
+
+                      ("w" "Work todos"
+                       ((todo "NEXT")
+                        (todo "TODO"))
+                       ((org-agenda-tag-filter-preset '("+work"))
+                        (rg-agenda-files '("~/Documents/org/myGTD.org"
+                                           "~/Documents/org/Projects.org"))
+                        (org-agenda-category-filter-preset '("-Financial"
+                                                             "-Calendar"))))
+
+                      ("e" "Errand todos"
+                       ((todo "NEXT")
+                        (todo "TODO"))
+                       ((org-agenda-tag-filter-preset '("+errand"))
+                        (org-agenda-files '("~/Documents/org/myGTD.org"
+                                            "~/Documents/org/Projects.org"))
+                        (org-agenda-category-filter-preset '("-Financial"
+                                                             "-Calendar"))))
+
+                      ("s" "School todos"
+                       ((todo "NEXT")
+                        (todo "TODO"))
+                       ((org-agenda-tag-filter-preset '("+school"))
+                        (org-agenda-files '("~/Documents/org/myGTD.org"
+                                            "~/Documents/org/Projects.org"))
+                        (org-agenda-category-filter-preset '("-Financial"
+                                                             "-Calendar"))))
+
+                      ("i" "Collection"
+                       todo "TODO"
+                       ((org-agenda-files '("~/Documents/org/Collection.org"))))
+
+                      ("r" "References"
+                       todo "REFERENCE"
+                       ((org-agenda-files '("~/Documents/org/References.org"))))
+
+                      ("o" "Someday"
+                       ((tags "NEXT")
+                        (todo "SOMEDAY"))
+                       ((org-agenda-files '("~/Documents/org/Someday.org"))))
+
+                      ("v" "Waiting"
+                       todo "WAITING"
+                       ((org-agenda-files '("~/Documents/org/Waiting.org"))))
+
+                      ("R" "What to read?"
+                       ((tags "NEXT")
+                        (todo "TODO"))
+                       ((org-agenda files '("~/Documents/org/Read.org"))))))
+
+              ;; Change todo to done when all of it's children are finished
+              (defun org-summary-todo (n-done n-not-done)
+                "Switch entry to DONE when all subentries are done, to TODO otherwise."
+                (let (org-log_done org-log-states) ;turn off logging
+                  (org-todo (if (= n-not-done 0) "DONE" "TODO"))))
+
+              ;; this is the hook that makes the todo change from the above.
+              (add-hook 'org-after-todo-statistics-hook 'org-summary-todo)
+
+              ;; set to nil to make org statistics cookie count todo entries in subtrees not
+              ;; just direct children.
+              (setq org-hierarchical-todo-statistics nil)
+
+              ;;set the defautlt location for agenda files
+              (setq org-agenda-files '("~/Documents/org/myGTD.org"
+                                       "~/Documents/org/Projects.org"
+                                       "~/Documents/org/Collection.org"
+                                       "~/Documents/org/Read.org"
+                                       "~/Documents/org/Someday.org"
+                                       "~/Documents/org/References.org"))
+
+              ;; Projectile configuration
+              (with-eval-after-load 'org-agenda
+                (require 'org-projectile)
+                (mapcar (lambda (file)
+                          (when (file-exists-p file)
+                            (push file org-agenda-files)))
+                        (org-projectile-todo-files)))
+
+
+              (defun my/org-projectile-project-todo-at-point()
+                (interactive)
+                (setq org-projectile-capture-template "* TODO %A :%^{prompt|home|work|computer|school|errand}:
+   :PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :END:")
+                (org-projectile-capture-for-current-project)
+                (setq org-projectile-capture-template  "* TODO %? :%^{prompt|home|work|computer|school|errand}:
+   :PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :END:"))
+
+              (setq org-projectile-capture-template  "* TODO %? :%^{prompt|home|work|computer|school|errand}:
+   :PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :END:")
+
+              ;; org-projectile keybindings go here
+              (global-set-key (kbd "C-c n p") 'org-projectile-project-todo-completing-read)
+              (global-set-key (kbd "C-c n P") 'org-projectile-capture-for-current-project)
+              (evil-define-key 'normal projectile-mode-map (kbd "C-c n a") 'my/org-projectile-project-todo-at-point)
+
+              ;; set the default location to store done tasks
+              ;; (setq org-archive-location "archive.org::")
+
+              ;; Don't erase all the meta info in the todo keep todo state and local tags
+              (setq org-archive-save-context-info '(todo ltags))
+
+              ;; Allow subtrees with tag archive to be cycled normally ;; do this so only headings in the archive file are officially "archived".
+              ;; Use :ARCHIVE: to find old forgotten headings mark with org-expiry
+              (setq org-cycle-open-archived-trees t)
+              (setq org-sparse-tree-open-archived-trees t)
+              (setq org-agenda-skip-archived-trees nil)
+              (setq org-columns-skip-archived-trees nil)
+              (setq org-export-with-archived-trees t)
+
+              ;;Function for exporting odt files from org files
+              (defun my/org-export-to-odt-and-open ()
+                (interactive)
+                (org-open-file (org-odt-export-to-odt)))
+
+              ;; This function moves all "DONE" "SOMEDAY" "WAITING" "TODO"s in agenda files to corresponding org files
+              ;; (defun my/org-archive-multi-tasks ()
+              ;;   (interactive)
+              ;;   (loop for (lowercase-todo-type  uppercase-todo-type) in '(("Trash" "/GONE")
+              ;;                                                             ("Trash" "/TRASH")
+              ;;                                                             ("Trash" "/DISPOSED")
+              ;;                                                             ("Trash" "/CANCELLED")
+              ;;                                                             ("Waiting" "/WAITING")
+              ;;                                                             ("Delegated" "/DELEGATED"))
+
+              ;;         ;; Create string with variables to set org-archive-location
+              ;;         do (setq org-archive-location (concat lowercase-todo-type ".org::"))
+              ;;         (setq org-collection-file-list '("~/Documents/org/myGTD.org"
+              ;;                                          "~/Documents/org/Collection.org"
+              ;;                                          "~/Documents/org/References.org"
+              ;;                                          "~/Documents/org/Someday.org"))
+
+              ;;         (org-map-entries
+              ;;          (lambda ()
+              ;;            (org-archive-subtree)
+              ;;            (setq org-map-continue-from (outline-previous-heading)))
+              ;;          uppercase-todo-type org-collection-file-list))
+
+              ;;   (setq org-archive-location '%s_archive::))
+
+              ;; set autofill in org-mode for word processor like wordwrap functionality.
+              (add-hook 'org-mode-hook
+                        (lambda ()
+                          ;; Enable fill column indicator
+                          (fci-mode t)
+                          ;; Set fill column to whatever you want
+                          (setq fill-column 80)
+                          (setq yas-indent-line "fixed")
+                          ;;enable automatic line wrapping at fill column
+                          (auto-fill-mode t)
+                          (flyspell-mode 1)))
+
+              ;; Set up org-refile targets here
+              (setq org-refile-targets (quote (("myGTD.org::Tasks" :level . 1)
+                                               ("myGTD.org::Calendar" :level . 1)
+                                               ("myGTD.org::Car Maintenance/Repair" :level . 1)
+                                               ("Projects.org" :maxlevel . 1)
+                                               ("Someday.org" :level . 0)
+                                               ("Waiting.org" :level . 0)
+                                               ("References.org" :level . 0)
+                                               ("Delegated.org" :level . 0)
+                                               ("Read.org" :level . 0)
+                                               ("deadline.ledger.org" :level . 0)
+                                               ("register.ledger.org" :level . 0))))
+
+              ;; set to nil so org refile shows all possible targets in helm at one time
+              (setq org-outline-path-complete-in-steps nil)
+
+              ;; Set to true to allow org-refile to create new nodes as new parents in org files.
+              (setq org-refile-allow-creating-parent-nodes t)
+              (setq org-refile-use-outline-path 'file)
+
+              ;;Org-crypt (setq org-tags-exclude-from-inheritance (quote ("crypt")))
+              ;; Todo I need to set this key up and pinentry
+              (setq org-crypt-key "emacs-journal")
+              ;; GPG key to use for encryption
+              ;; Either the key id or set to nil to use symmetric encryption
+              ;; Attention must add:
+              ;; # -*- buffer-auto-save-file-name: nil; -*-
+              ;; to top of org files with encryption or youll get an
+              ;; annoying message. You could also turn off auto save globally like this:
+              ;; (setq auto-save-default nil)
+
+              (defun my/org-expiry-delete-archive-reset ()
+                (interactive "c/Delete, Archive, Reset:"
+                             (cond ((char-equal ?D my-expiry-choice)
+                                    '(org-cut-subtree))
+                                   ((char-equal ?d my-expiry-choice)
+                                    '(org-cut-subtree))
+                                   ((char-equal ?A my-expiry-choice)
+                                    '(org-archive-subtree))
+                                   ((char-equal ?a my-expiry-choice)
+                                    '(org-archive-subtree))
+                                   ((char-equal ?R my-expiry-choice)
+                                    '(org-expiry-insert-created))
+                                   ((char-equal ?r my-expiry-choice)
+                                    '(org-expiry-insert-created &optional t))
+                                   (t (message "Unrecognized option bad char!")))))
+
+              ;; Create a variable for the expiry property
+              (setq org-expiry-expiry-property-name "EXPIRY")
+
+              ;; Set the function to run when calling org-expiry
+              (setq org-expiry-handler-function 'org-expiry-add-keyword)
+
+              ;; "create" help r function for my/org-expiry-add-timestamp-1y-expiry ()
+              (defun my/org-expiry-helper-insert-create ()
+                (interactive)
+                (save-excursion
+                  (org-back-to-heading)
+                  (org-expiry-insert-created)))
+
+              ;; "insert" helper function for my/org-expiry-add-timestamp-1y-expiry ()
+              (defun my/org-expiry-helper-insert-expiry ()
+                (save-excursion
+                  (org-entry-put
+                   (point) org-expiry-expiry-property-name timestr)))
+
+              ;; Add expiry mechanism to emacs items will expire in one year at which time
+              ;; you may check for expired entries with M-x org-expiry-process-entries.
+              (defun my/org-expiry-add-timestamp-1y-expiry ()
+                (interactive)
+                (save-excursion
+                  (when (string= (org-get-todo-state) "TODO")
+                    (let* ((d (org-entry-get (point) org-expiry-expiry-property-name)))
+                      (setq timestr "1y")
+                      (my/org-expiry-helper-insert-create)
+                      (my/org-expiry-helper-insert-expiry)))))
+
+              ;; Set timestamps inactive so everything doesn't show up in the agenda
+              (setq org-expiry-inactive-timestamps t)
+
+              (add-hook 'org-after-todo-state-change-hook 'my/org-expiry-add-timestamp-1y-expiry)
+
+              ;; Add hook to insert timestamp when todo state is changed the heading is set to "TODO"
+
+              ;; Make org treat isert of todo as state change
+              ;; so that org-expire will automatically insert
+              ;; a "CREATED" "EXPIRED" tag.
+              (setq org-treat-insert-todo-heading-as-state-change t)
+
+              ;; Set the amount of days org should start warning you before a deadline
+              (setq org-deadline-warning-days 2)
+
+              ;; Don't show scheduled items that are already "DONE".
+              (setq org-agenda-skip-scheduled-if-done t)
+              (setq org-agenda-skip-deadline-if-done t)
+              (setq org-agenda-skip-timestamp-if-done t))
+;; org-mode:1 ends here
+
+;; [[file:~/.spacemacs.d/spacemacs.org::*mu4e][mu4e:1]]
+(setq mu4e-maildir "~/.mail"
+      mu4e-trash-folder "/gmail/[Gmail]/Trash"
+      mu4e-refile-folder "/gmail/email_archive"
+      mu4e-get-mail-command "mbsync -a"
+      mu4e-update-interval nil
+      mu4e-compose-signature-auto-include t
+      mu4e-view-show-images t
+      mu4e-view-show-addresses t
+      mu4e-sent-folder "/gmail/[Gmail]/Sent Mail"
+      mu4e-drafts-folder "/gmail/[Gmail]/Drafts"
+      ;; Gmail does this see mu4e-sent-messages behavior to configure
+      ;;for additional non gmail accounts
+      mu4e-sent-messages-behavior 'delete
+      user-mail-address "jaredwrd951@gmail.com"
+      user-full-name "Jared Ward"
+      mu4e-compose-signature
+      (concat
+       "Jared M. Ward\n"
+       "Portland, OR")
+      message-send-mail-function 'message-send-mail-with-sendmail
+      sendmail-program "/usr/bin/msmtp"
+      ;;Use the correct account context when sending mail based on the from header
+      message-sendmail-extra-arguments '("--read-envelope-from")
+      message-sendmail-f-is-evil 't
+      mu4e-attachment-dir "/home/jroddius/Download"
+      mu4e-change-filenames-when-moving t)
+
+                                      ;(add-hook 'message-send-mail-hook 'choose-msmtp-account)
+
+(setq mu4e-maildir-shortcuts
+      '(("/gmail/primary/" . ?p)
+        ("/gmail/promotions/" . ?P)
+        ("/gmail/social_email/" . ?s)
+        ("/gmail/forums_email/" . ?f)
+        ("/gmail/Family/" . ?F)
+        ("/gmail/Work/" . ?w)
+        ("/gmail/email_updates/" . ?u)
+        ("/gmail/[Gmail]/Drafts/" . ?d)
+        ("/gmail/[Gmail]/Sent Mail/" . ?S)
+        ("/gmail/[Gmail]/Spam/" . ?!)
+        ("/gmail/[Gmail]/Trash/" . ?t)))
+;; mu4e:1 ends here
+
+;; [[file:~/.spacemacs.d/spacemacs.org::*auto-completion][auto-completion:1]]
+;; make company the global auto-completion plugin
+(global-company-mode)
+
+;;configures nicer looking faces for auto-completion
+(custom-set-faces
+ '(company-tooltip-common
+   ((t (:inherit company-tooltip :weight bold :underline nil))))
+ '(company-tooltip-common-selection
+   ((t (:inherit company-tooltip-selection :weight bold :underline nil)))))
+
+;;set the delay of autocompletion here 0 means instant
+(setq company-idle-delay 0)
+;; auto-completion:1 ends here
+
+;; [[file:~/.spacemacs.d/spacemacs.org::*Arch%20linux][Arch linux:1]]
+;;Add a pkgbuild mode for Arch linux packages
+(use-package pkgbuild-mode)
+;; Arch linux:1 ends here
+
+;; [[file:~/.spacemacs.d/spacemacs.org::*laTex][laTex:1]]
+;;Auto update pdf preview when file recompiled
+(add-hook 'doc-view-mode-hook 'auto-revert-mode)
+
+;; Theming set backgound theme so terminal mode is transparent
+(defun set-background-for-terminal (&optional frame)
+  (or frame (setq frame (selected-frame)))
+  "unsets the background color in terminal mode"
+  (if (display-graphic-p frame)
+      (spacemacs/enable-transparency) (set-face-background 'default "unspecified-bg" frame)))
+(add-hook 'after-make-frame-functions 'set-background-for-terminal)
+(add-hook 'window-setup-hook 'set-background-for-terminal)
+
+;; fix for pdf-tools auto revert specified by author https://github.com/politza/pdf-tools#known-problems
+(add-hook 'Tex-after-compilation-finished-function #'Tex-revert-document-buffer)
+
+;; open buffers in emacs automatically
+(find-file-noselect "~/Documents/org/myGTD.org")
+(find-file-noselect "~/Documents/org/Projects.org")
+(find-file-noselect "~/Documents/org/Collection.org")
+(find-file-noselect "~/Documents/org/References.org")
+(find-file-noselect "~/Documents/org/Read.org")
+(find-file-noselect "~/Documents/org/Delegated.org")
+(find-file-noselect "~/Documents/org/Waiting.org")
+(find-file-noselect "~/Documents/org/Someday.org")
+
+;; Set defaul browser for emacs to call
+(setq browse-url-browser-function 'browse-url-generic
+      browse-url-generic-program "qutebrowser")
+
+;; Spaceline configuration
+)
+;; laTex:1 ends here
+
+;; [[file:~/.spacemacs.d/spacemacs.org::*This%20is%20where%20*emacs*%20will%20auto%20generate%20custom%20variable%20definitions][This is where *emacs* will auto generate custom variable definitions:1]]
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
 (custom-set-variables
@@ -1160,20 +1529,22 @@ before packages are loaded."
 This is an auto-generated function, do not modify its content directly, use
 Emacs customize menu instead.
 This function is called at the very end of Spacemacs initialization."
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(evil-want-Y-yank-to-eol nil)
- '(package-selected-packages
-   (quote
-    (ledger-mode php-extras zenburn-theme zen-and-art-theme white-sand-theme underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme seti-theme reverse-theme rebecca-theme railscasts-theme purple-haze-theme professional-theme planet-theme phoenix-dark-pink-theme phoenix-dark-mono-theme organic-green-theme omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme naquadah-theme mustang-theme monokai-theme monochrome-theme molokai-theme moe-theme minimal-theme material-theme majapahit-theme madhat2r-theme lush-theme light-soap-theme jbeans-theme jazz-theme ir-black-theme inkpot-theme heroku-theme hemisu-theme hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme gandalf-theme flatui-theme flatland-theme farmhouse-theme exotica-theme espresso-theme dracula-theme django-theme darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cyberpunk-theme color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized clues-theme cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes afternoon-theme helm-pass vmd-mode mmm-mode markdown-toc gh-md company-auctex auctex drupal-mode phpunit phpcbf php-auto-yasnippets php-mode pkgbuild-mode typit mmt sudoku pacmacs dash-functional 2048-game flyspell-popup company-quickhelp auth-source-pass password-store smeargle orgit magit-gitflow helm-gitignore gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link evil-magit magithub markdown-mode ghub+ magit magit-popup git-commit apiwrap ghub let-alist with-editor web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data flycheck-pos-tip pos-tip flycheck flyspell-correct-helm flyspell-correct auto-dictionary ox-gfm org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot insert-shebang fish-mode company-shell xterm-color shell-pop multi-term eshell-z eshell-prompt-extras esh-help helm-company helm-c-yasnippet fuzzy disaster company-statistics company-c-headers company cmake-mode clang-format auto-yasnippet yasnippet ac-ispell auto-complete ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(default ((t (:background nil)))))
-)
-
+  (custom-set-variables
+   ;; custom-set-variables was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   '(evil-want-Y-yank-to-eol nil)
+   '(package-selected-packages
+     (quote
+      (yasnippet-classic-snippets zones php-extras zenburn-theme zen-and-art-theme white-sand-theme underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme seti-theme reverse-theme rebecca-theme railscasts-theme purple-haze-theme professional-theme planet-theme phoenix-dark-pink-theme phoenix-dark-mono-theme organic-green-theme omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme naquadah-theme mustang-theme monokai-theme monochrome-theme molokai-theme moe-theme minimal-theme material-theme majapahit-theme madhat2r-theme lush-theme light-soap-theme jbeans-theme jazz-theme ir-black-theme inkpot-theme heroku-theme hemisu-theme hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme gandalf-theme flatui-theme flatland-theme farmhouse-theme exotica-theme espresso-theme dracula-theme django-theme darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cyberpunk-theme color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized clues-theme cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes afternoon-theme helm-pass vmd-mode mmm-mode markdown-toc gh-md company-auctex auctex drupal-mode phpunit phpcbf php-auto-yasnippets php-mode pkgbuild-mode typit mmt sudoku pacmacs dash-functional 2048-game flyspell-popup company-quickhelp auth-source-pass password-store smeargle orgit magit-gitflow helm-gitignore gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link evil-magit magithub markdown-mode ghub+ magit magit-popup git-commit apiwrap ghub let-alist with-editor web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data flycheck-pos-tip pos-tip flycheck flyspell-correct-helm flyspell-correct auto-dictionary ox-gfm org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot insert-shebang fish-mode company-shell xterm-color shell-pop multi-term eshell-z eshell-prompt-extras esh-help helm-company helm-c-yasnippet fuzzy disaster company-statistics company-c-headers company cmake-mode clang-format auto-yasnippet yasnippet ac-ispell auto-complete ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
+  (custom-set-faces
+   ;; custom-set-faces was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   '(default ((t (:background nil))))
+   '(company-tooltip-common ((t (:inherit company-tooltip :weight bold :underline nil))))
+   '(company-tooltip-common-selection ((t (:inherit company-tooltip-selection :weight bold :underline nil)))))
+  )
+;; This is where *emacs* will auto generate custom variable definitions:1 ends here
