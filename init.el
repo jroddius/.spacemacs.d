@@ -1103,7 +1103,7 @@ Update the ledger-accounts-file to make addition permanent"
    :END:")
 
                       ;; Capture a general reference
-                      ("r" "Capture a typed reference" entry (file "Reference.org")
+                      ("r" "Capture a typed reference" entry (file "References.org")
                        "* REFERENCE %?%^G
    :PROPERTIES:
    :CREATED:  %U
