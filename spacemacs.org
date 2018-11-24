@@ -170,7 +170,6 @@
      ;; installs *all* packages supported by Spacemacs and never uninstalls them.
      ;; (default is `used-only')
      dotspacemacs-install-packages 'used-only))
-
 #+end_src
 
 * Initialization 
@@ -527,7 +526,6 @@
      ;; visiting README.org files of Spacemacs.
      ;; (default nil)
      dotspacemacs-pretty-docs nil))
-
 #+end_src    
 
 * User Configuration
@@ -541,7 +539,6 @@
   variables declared in `~/.spacemacs.env' or `~/.spacemacs.d/.spacemacs.env'.
   See the header of this file for more information."
     (spacemacs/load-spacemacs-env))
-
 #+end_src   
 
 ** dotspacemacs/user-init
@@ -553,39 +550,37 @@
   configuration.
   It is mostly for variables that should be set before packages are loaded.
   If you are unsure, try setting them in `dotspacemacs/user-config' first."
-  ;; set the default outside program to use for spellchecking with flycheck.
-  (setq ispell-program-name "/usr/bin/hunspell")
+    ;; set the default outside program to use for spellchecking with flycheck.
+    (setq ispell-program-name "/usr/bin/hunspell")
     )
-
 #+end_src
 
 ** dotspacemacs/user-load
     
     #+begin_src elisp :tangle init.el :comments link
-  (defun dotspacemacs/user-load ()
-    "Library to load while dumping.
-  This function is called only while dumping Spacemacs configuration. You can
-  `require' or `load' the libraries of your choice that will be included in the
-  dump."
-    )
-
+      (defun dotspacemacs/user-load ()
+        "Library to load while dumping.
+      This function is called only while dumping Spacemacs configuration. You can
+      `require' or `load' the libraries of your choice that will be included in the
+      dump."
+        )
 #+end_src
 
 ** dotspacemacs/user-config
    
  #+begin_src elisp :tangle init.el :comments link
-            (defun dotspacemacs/user-config ()
-              "Configuration for user code:
-            This function is called at the very end of Spacemacs startup, after layer
-            configuration.
-            Put your configuration code here, except for variables that should be set
-            before packages are loaded."
+   (defun dotspacemacs/user-config ()
+     "Configuration for user code:
+   This function is called at the very end of Spacemacs startup, after layer
+   configuration.
+   Put your configuration code here, except for variables that should be set
+   before packages are loaded."
   #+end_src          
   
 *** Ledger Mode
     
   #+begin_src elisp :tangle init.el :comments link   
-      ;; ledger-mode setup
+    ;; ledger-mode setup
       (autoload 'ledger-mode "ledger-mode" "A major mode for Ledger" t)
       (add-to-list 'auto-mode-alist '("\\.ledger$" . ledger-mode))
 
@@ -603,7 +598,6 @@
       (defun my/ledger-create-payee-list ()
         "Return a list of all known payee names as strings.
     Looks in `ledger-accounts-file' if set, otherwise the current buffer."
-        (interactive)
         (setq my/ledger-payee-list
               (if ledger-accounts-file
                   (let ((f ledger-accounts-file))
@@ -627,7 +621,6 @@
         "Get the name of the payee for the ledger transaction and append to list if
     not present additions to list will not be available after emacs is restarted.
     Update the ledger-accounts-file to make addition permanent"
-        (interactive)
         (let ((payee (message "%s" (helm-comp-read "What is the name of the Payee? " my/ledger-payee-list :fuzzy t))))
           (add-to-list 'my/ledger-payee-list payee)
           (setq my/ledger-payee-account-name payee)))
@@ -652,34 +645,31 @@
                                        ("Equity" . "my/ledger-equity-account-name-list")))
 
       (defun my/ledger-return-org-capture-expenses-string ()
-        (interactive)
-        (concatenate 'string "#+begin_src ledger :tangle register.ledger\n"
+        (concatenate 'string "#+begin_src ledger :tangle Personal.ledger :comments link\n" ; must put space at beginning of string or the syntax will be wrong.
                      (format-time-string "%Y/%m/%d" (current-time)) " " my/ledger-payee-account-name "\n  "
                      (my/ledger-get-expenses-account-name)
                      "                                 "
                      (my/ledger-how-much-are-you-paying) "\n  "
                      (my/ledger-get-payment-account-name) "\n"
-                     "#+end_src"))
+                     "#+end_src")) ; must put space at beginning of string or the syntax will be wrong.
 
       (defun my/ledger-return-org-capture-assets-string ()
-        (interactive)
-        (concatenate 'string "#+begin_source ledger :tangle register.ledger\n"
-                     (format-time-string "%Y/%m/%d" (current-time)) " " my/ledger-get-payee-account-name "\n  "
+        (concatenate 'string "#+begin_src ledger :tangle Personal.ledger :comments link\n" ; must put space at beginning of string or the syntax will be wrong.
+                     (format-time-string "%Y/%m/%d" (current-time)) " " my/ledger-payee-account-name "\n  "
                      (my/ledger-get-assets-account-name)
                      "                                 "
                      (my/ledger-how-much-are-you-paying) "\n  "
                      (my/ledger-get-income-assets-liabilities-account-name) "\n"
-                     "#+end_src"))
+                     "#+end_src")) ; must put space at beginning of string or the syntax will be wrong.
 
       (defun my/ledger-return-org-capture-liabilities-string ()
-        (interactive)
-        (concatenate 'string "#+begin_source ledger :tangle register.ledger\n"
-                     (format-time-string "%Y/%m/%d" (current-time)) " " my/ledger-get-payee-account-name "\n  "
+        (concatenate 'string "#+begin_src ledger :tangle Personal.ledger :comments link\n" ; must put space at beginning of string or the syntax will be wrong.
+                     (format-time-string "%Y/%m/%d" (current-time)) " " my/ledger-payee-account-name "\n  "
                      (my/ledger-get-liabilities-account-name)
                      "                                 "
                      (my/ledger-how-much-are-you-paying) "\n  "
                      (my/ledger-get-payment-account-name) "\n"
-                     "#+end_src"))
+                     "#+end_src")) ; must put space at beginning of string or the syntax will be wrong.
 
 
       (defun my/ledger-insert-yasnippet-template ()
@@ -692,7 +682,6 @@
 
       (defun my/ledger-create-list-of-accounts-for-each-type ()
         "Return a list for each account in the accounts type list"
-        (interactive)
         (dolist (type my/list-of-account-types)
           (set (intern (cdr type))
                (my/ledger-get-account-list-by-type-regexp (car type)))))
@@ -703,308 +692,360 @@
 
       (defun my/ledger-get-expenses-account-name ()
         "Use completing and return an expense account name"
-        (interactive)
         (let ((expense (message "%s" (helm-comp-read "What are you paying for? " my/ledger-expenses-account-name-list :fuzzy t))))
           (add-to-list 'my/ledger-expenses-account-name-list expense)
           (setq my/ledger-expenses-account-name expense)))
 
       (defun my/ledger-get-equity-account-name ()
         "Use completing and return an equity account name"
-        (interactive)
         (let ((equity (message "%s" (helm-comp-read "Pick an equity account? " my/ledger-equity-account-name-list :fuzzy t))))
           (add-to-list 'my/ledger-equity-account-name-list equity)
           (setq my/ledger-equity-account-name expense)))
 
       (defun my/ledger-get-assets-account-name ()
         "Use completing and return an assets account name"
-        (interactive)
         (let ((assets (message "%s" (helm-comp-read "Pick an asset? " my/ledger-assets-account-name-list :fuzzy t))))
           (add-to-list 'my/ledger-assets-account-name-list assets)
           (setq my/ledger-assets-account-name assets)))
 
       (defun my/ledger-get-liabilities-account-name ()
         "Use completing and return a liabilities account name"
-        (interactive)
-        (let ((liabilities (message "%s" (helm-comp-read "Pick an asset? " my/ledger-liabilities-account-name-list :fuzzy t))))
+        (let ((liabilities (message "%s" (helm-comp-read "Pick a liability? " my/ledger-liabilities-account-name-list :fuzzy t))))
           (add-to-list 'my/ledger-liabilities-account-name-list liabilities)
           (setq my/ledger-liabilities-account-name liabilities)))
-    (setq debug-on-error t)
-    (defun my/ledger-get-payment-account-name ()
-      "Use completing and return a payment account name"
-      (interactive)
-      (let ((payment-list (append my/ledger-assets-account-name-list
-                                  my/ledger-liabilities-account-name-list)))
-        (let ((payment (message "%s" (helm-comp-read "Pick an asset? " payment-list :fuzzy t))))
-          (setq my/ledger-payment-account-name payment))))
+      (setq debug-on-error t)
+      (defun my/ledger-get-payment-account-name ()
+        "Use completing and return a payment account name"
+        (let ((payment-list (append my/ledger-assets-account-name-list
+                                    my/ledger-liabilities-account-name-list)))
+          (let ((payment (message "%s" (helm-comp-read "Pick a liability? " payment-list :fuzzy t))))
+            (setq my/ledger-payment-account-name payment))))
 
       (defun my/ledger-get-income-assets-liabilities-account-name ()
         "Use completing and return a income, assets and liabilities account name"
-        (interactive)
         (let ((payment-list (append my/ledger-income-account-name-list
                                     my/ledger-assets-account-name-list
                                     my/ledger-liabilities-account-name-list)))
-              (let ((payment (message "%s" (helm-comp-read "Pick an asset, income, or liability: " payment-list :fuzzy t))))
-          (setq my/ledger-income-assets-liabilities-account-name payment))))
-
+          (let ((payment (message "%s" (helm-comp-read "Pick an asset, income, or liability: " payment-list :fuzzy t))))
+            (setq my/ledger-income-assets-liabilities-account-name payment))))
 #+end_src
 
 *** default variables
     
 #+begin_src elisp :tangle init.el :comments link
-             ;;set the default browser for viewing links in spacemacs
-             (setq gnus-button-url 'browse-url-generic
-                   browse-url-generic-program "qutebrowser"
-                   browse-url-browserfunction gnus-button-url)
-
+  ;;set the default browser for viewing links in spacemacs
+  (setq gnus-button-url 'browse-url-generic
+        browse-url-generic-program "qutebrowser"
+        browse-url-browserfunction gnus-button-url)
 #+end_src
 
 *** frame-mode
     Leave frame handling up to i3 it does a better job controlling windows
     
 #+begin_src elisp :tangle init.el :comments link
-             ;; have i3 control the windows instead of emacs
-             (defvar i3-use-frame-mode
-               (s-contains? "i3" (shell-command-to-string "wmctrl -m")))
+  ;; have i3 control the windows instead of emacs
+  (defvar i3-use-frame-mode
+    (s-contains? "i3" (shell-command-to-string "wmctrl -m")))
 
-             (use-package frame-mode
-               :if i3-use-frame-mode
-               :demand t
-               :config
-               (progn
-                 (add-hook 'frame-mode-hook (lambda () (display-time-mode -1)))
-                 (frame-mode +1)
-                 (frame-keys-mode nil)))
+  (use-package frame-mode
+    :if i3-use-frame-mode
+    :demand t
+    :config
+    (progn
+      (add-hook 'frame-mode-hook (lambda () (display-time-mode -1)))
+      (frame-mode +1)
+      (frame-keys-mode nil)))
 
-             ;; Have Calendar always open in the same frame
-             (push '("*Calendar*" . (display-buffer-same-window display-buffer-pop-up-window)) frame-mode-display-buffer-alist)
-
+  ;; Have Calendar always open in the same frame
+  (push '("*Calendar*" . ((display-buffer-same-window display-buffer-pop-up-window) .
+                          ((inhibit-switch-frame . t))))
+        frame-mode-display-buffer-alist)
 #+end_src
 
 *** Magit
     
 #+begin_src elisp :tangle init.el :comments link
-             ;;Tells Magit where the git repos are for the auto-complete feature
-             (setq magit-repository-directories '("~/Programming/repos"))
-             (setq magit-refresh-status-buffer nil)
-             ;;uncomment line below for Magit SVN plugin
-             ;;(defun dotspacemacs/user-init () (setq-defult git-enable-magit-svn-plugin t))
-             ;;adds the ability to edit commits in Magit
-             (global-git-commit-mode)
-
+  ;;Tells Magit where the git repos are for the auto-complete feature
+  (setq magit-repository-directories '("~/Programming/repos"))
+  (setq magit-refresh-status-buffer nil)
+  ;;uncomment line below for Magit SVN plugin
+  ;;(defun dotspacemacs/user-init () (setq-defult git-enable-magit-svn-plugin t))
+  ;;adds the ability to edit commits in Magit
+  (global-git-commit-mode)
 #+end_src
 
 *** helm
+    
 #+begin_src elisp :tangle init.el :comments link
-             (use-package helm-pass)
+  (use-package helm-pass)
 #+end_src
 
 *** langtool
     
 #+begin_src elisp :tangle init.el :comments link
-             ;; Language tool for grammar checking
-             (add-to-list 'load-path "~/.emacs.d/")
-             (setq langtool-java-classpath "/usr/share/languagetool:/usr/share/java/languagetool/*"
-                   langtool-default-language "en-US")
-             (require 'langtool)
+  ;; Language tool for grammar checking
+  (add-to-list 'load-path "~/.emacs.d/")
+  (setq langtool-java-classpath "/usr/share/languagetool:/usr/share/java/languagetool/*"
+        langtool-default-language "en-US")
+  (require 'langtool)
 
-             ;; ;; add some keybindings for langtool
-             (spacemacs/set-leader-keys "SPC L" 'langtool)
-             (define-key evil-normal-state-map (kbd "SPC L w") 'langtool-check)
-             (define-key evil-normal-state-map (kbd "SPC L w") 'langtool-check-done)
-             (define-key evil-normal-state-map (kbd "SPC L l") 'langtool-switch-default-language)
-             (define-key evil-normal-state-map (kbd "SPC L x") 'langtool-show-message-at-point)
-             (define-key evil-normal-state-map (kbd "SPC L c") 'langtool-correct-buffer)
-
+  ;; ;; add some keybindings for langtool
+  (spacemacs/set-leader-keys "SPC L" 'langtool)
+  (define-key evil-normal-state-map (kbd "SPC L w") 'langtool-check)
+  (define-key evil-normal-state-map (kbd "SPC L w") 'langtool-check-done)
+  (define-key evil-normal-state-map (kbd "SPC L l") 'langtool-switch-default-language)
+  (define-key evil-normal-state-map (kbd "SPC L x") 'langtool-show-message-at-point)
+  (define-key evil-normal-state-map (kbd "SPC L c") 'langtool-correct-buffer)
 #+end_src
 
 *** org-mode
+    
 #+begin_src elisp :tangle init.el :comments link
+  (with-eval-after-load 'org
 
-             (with-eval-after-load 'org
+      (setq org-src-tab-acts-natively t)
+      ;; set key bindings for org here.
+      (define-key evil-normal-state-map (kbd "SPC a S") 'org-save-all-org-buffers)
+      (define-key evil-normal-state-map (kbd "SPC a O") 'org-switchb)
 
-               (setq org-src-tab-acts-natively t)
-               ;; set key bindings for org here.
-               (define-key evil-normal-state-map (kbd "SPC a S") 'org-save-all-org-buffers)
-               (define-key evil-normal-state-map (kbd "SPC a O") 'org-switchb)
+      (evil-define-key 'normal org-mode-map (kbd ", O") 'org-switchb)
+      (evil-define-key 'normal org-mode-map (kbd ", S") 'org-save-all-org-buffers)
+      (evil-define-key 'normal org-mode-map (kbd ", b m") 'org-edit-src-code)
 
-               (evil-define-key 'normal org-mode-map (kbd ", O") 'org-switchb)
-               (evil-define-key 'normal org-mode-map (kbd ", S") 'org-save-all-org-buffers)
-               (evil-define-key 'normal org-mode-map (kbd ", b m") 'org-edit-src-code)
+      ;;set the directory where all your org files will be stored.
+      (setq org-directory "~/Documents/org")
 
-               ;;set the directory where all your org files will be stored.
-               (setq org-directory "~/Documents/org")
+      ;; Org babel settings
+      (org-babel-do-load-languages
+       'org-babel-load-languages
+       '((R . t)
+         (emacs-lisp .t)
+         (gnuplot . t)
+         (latex . t)
+         (ledger . t)
+         (python . t)))
 
-               ;; Org babel settings
-               (org-babel-do-load-languages
-                'org-babel-load-languages
-                '((R . t)
-                  (emacs-lisp .t)
-                  (gnuplot . t)
-                  (latex . t)
-                  (ledger . t)
-                  (python . t)))
+      (setq my/ledger-org-babel-tangle-these-files '("~/Documents/org/Personal.ledger.org"))
 
 
-               (defun my/babel-personal-ledger-file ()
-                 "Use org-babel to create ledger file"
-                 (interactive)
-                 (org-babel-tangle-file "~/Documents/org/register.ledger.org")
-                 (shell-command "cat ~/Documents/org/accounts.temp.ledger ~/Documents/org/register.ledger ~/Documents/org/register.temp.ledger > ~/Documents/org/Personal.ledger"))
+      (defun my/babel-personal-ledger-file ()
+        "Use org-babel to create ledger file"
+        (interactive)
+        (dolist (element my/ledger-org-babel-tangle-these-files)
+          (org-babel-tangle-file element)))
 
-               ;;set the org journal directory here
-               (setq org-journal-dir "journal")
-               ;; set the journal file format adding extions like .org to end of format
-               ;; will break the compiler.
-               (setq org-journal-file-format "%Y-%m-%d")
-               (setq org-journal-date-prefix "")
-               (setq org-journal-date-format "%A, %B %d %Y")
-               (setq org-journal-time-prefix "* ")
-               (setq org-journal-time-format "")
+      (defun my/ledger-org-insert-done-or-created-date ()
+        "Get done date from org CLOSED property and replace the date in the babel ledger source block under the same heading. Replace with CREATED date if not CLOSED."
+        (interactive)
+        ;(save-excursion
+          (if (not (my/org-check-if-heading-is-CLOSED))
+              (re-search-forward "CREATED"))
+           (evil-forward-WORD-begin)
+           (evil-forward-word-begin)
+           (let ((point1 (point)))
+             (evil-forward-WORD-end)
+             (let ((point2 (+ 1 (point))))
+               (re-search-forward "[[:space:]]?2?0?[0-9][0-9]\/[0-1][0-9]\/[0-3][0-9]")
+              (let ((point3 (point)))
+                (evil-backward-WORD-begin)
+                (evil-delete (point) point3))
+              (let ((temp-string (buffer-substring point1 point2)))
+                (message temp-string)
+                   (let ((temp-string-list (split-string temp-string "-")))
+                         (insert (concatenate 'string (nth 0 temp-string-list)
+                                                        "/"
+                                                        (nth 1 temp-string-list)
+                                                        "/"
+                                                        (nth 2 temp-string-list))))))))
 
-               ;; Set the program to open pdf files for BibTeX layer
-               (setq org-ref-open-pdf-function
-                     (lambda (fpath)
-                       (start-process "zathura" "*helm-bibtex-zathura" "/usr/bin/zathura" fpath)))
-               (setq org-catch-invisible-edits 'smart)
+      (defun my/org-check-if-heading-is-CLOSED ()
+        "Check if the headline is closed if it is return true otherwise false"
+        (org-back-to-heading)
+        (org-down-element)
+        (evil-forward-word-begin)
+        (let ((point1 (point)))
+          (evil-forward-word-end)
+          (let ((temp-point (point)))
+            (let((point2 (+ 1 temp-point)))
+              (string= "CLOSED" (buffer-substring point1 point2))))))
 
-               ;; Set the org default bibliography
-               (setq org-ref-default-bibliography '("~/Documents/org/References.bib")
-                     org-ref-pdf-direcory "~/Documents/org"
-                     org-ref-bibliography-notes "~/Documents/org/References.org::Bibliography")
+      (defun my/org-change-closed-date ()
+        (interactive)
+        (my/org-change-closed-or-created-date nil))
 
-               ;; add different bullets to org
-               (setq org-bullets-bullet-list '("■" "○" "▶" "✿"))
+      (defun my/org-change-created-date ()
+        (interactive)
+        (my/org-change-closed-or-created-date t))
 
-               ;; set org TODO keyword workflow states, here is an example
-               (setq org-todo-keywords
-                     '((sequence "TODO(t)"
-                                 "NEXT(n)"
-                                 "DELEGATED(x@!)" "|"
-                                 "CANCELLED(c@)"
-                                 "DONE(d)")
+      (defun my/org-change-closed-or-created-date (created)
+        (save-excursion
+          (org-back-to-heading)
+          (if created
+              (progn (re-search-forward "CREATED")
+                     (evil-forward-WORD-begin)
+                     (org-time-stamp-inactive t))
+            (if (my/org-check-if-heading-is-CLOSED)
+                (progn (org-down-element)
+                       (evil-forward-WORD-begin 2)
+                       (evil-forward-word-begin)
+                       (evil-forward-char)
+                       (org-time-stamp-inactive t))
+              (message "Headline not in 'DONE' state, unable to insert new date.")))))
 
-                       (sequence "WAITING(w@!)"
-                                 "|"
-                                 "DISPOSED(d)")
+      ;;set the org journal directory here
+      (setq org-journal-dir "journal")
+      ;; set the journal file format adding extions like .org to end of format
+      ;; will break the compiler.
+      (setq org-journal-file-format "%Y-%m-%d")
+      (setq org-journal-date-prefix "")
+      (setq org-journal-date-format "%A, %B %d %Y")
+      (setq org-journal-time-prefix "* ")
+      (setq org-journal-time-format "")
 
-                       (sequence "SOMEDAY(s)" "|"
-                                 "NEVER(n)")
+      ;; Set the program to open pdf files for BibTeX layer
+      (setq org-ref-open-pdf-function
+            (lambda (fpath)
+              (start-process "zathura" "*helm-bibtex-zathura" "/usr/bin/zathura" fpath)))
+      (setq org-catch-invisible-edits 'smart)
 
-                       (sequence "REFERENCE(r)" "|"
-                                 "TRASH(t)")
+      ;; Set the org default bibliography
+      (setq org-ref-default-bibliography '("~/Documents/org/References.bib")
+            org-ref-pdf-direcory "~/Documents/org"
+            org-ref-bibliography-notes "~/Documents/org/References.org::Bibliography")
 
-                       (sequence "EXPIRED(e)"
-                                 "RESET(r)" "|"
-                                 "GONE")))
+      ;; add different bullets to org
+      (setq org-bullets-bullet-list '("■" "○" "▶" "✿"))
 
-               ;; set the default org capture file
-               (setq org-default-notes-file "~/Documents/org/Collection.org")
+      ;; set org TODO keyword workflow states, here is an example
+      (setq org-todo-keywords
+            '((sequence "TODO(t)"
+                        "NEXT(n)"
+                        "DELEGATED(x@!)" "|"
+                        "CANCELLED(c@)"
+                        "DONE(d)")
 
-               ;;destroy org-capture frame after finalization
-               (defadvice org-capture-finalize
-                   (after delete-capture-frame activate)
-                 "Advise capture-finalize to close the frame"
-                 (if (equal "Org Select" (frame-parameter nil 'name))
-                     (delete-frame)))
+              (sequence "WAITING(w@!)"
+                        "|"
+                        "DISPOSED(d)")
 
-               ;; destroy org-capture frame after kill
-               (defadvice org-capture-kill
-                   (after delete-capture-frame activate)
-                 "Advise capture-kill to close the frame"
-                 (if (equal "Org Select" (frame-parameter nil 'name))
-                     (delete-frame)))
+              (sequence "SOMEDAY(s)" "|"
+                        "NEVER(n)")
 
-               ;; Keep org capture in single window
-               (defun widen-org-capture-buffer ()
-                 (interactive)
-                 "Make the org capture buffer take up the entire frame"
-                 (delete-other-windows))
-               (advice-add 'org-capture :after #'widen-org-capture-buffer)
+              (sequence "REFERENCE(r)" "|"
+                        "TRASH(t)")
 
-               ;;Set the context tags(these tags represent where something can be done)
-               (setq org-tag-alist '(("home" . ?h)
-                                     ("work" . ?w)
-                                     ("computer" . ?c)
-                                     ("school" . ?s)
-                                     ("errand" . ?e)
-                                     ("trip" . ?t)
-                                     ("vacation" . ?v)))
+              (sequence "EXPIRED(e)"
+                        "RESET(r)" "|"
+                        "GONE")))
 
-               ;; set your org capture templates here
-               (setq org-capture-templates
+      ;; set the default org capture file
+      (setq org-default-notes-file "~/Documents/org/Collection.org")
 
-                     '(("t" "General task collection and generation")
+      ;;destroy org-capture frame after finalization
+      (defadvice org-capture-finalize
+          (after delete-capture-frame activate)
+        "Advise capture-finalize to close the frame"
+        (if (equal "Org Select" (frame-parameter nil 'name))
+            (delete-frame)))
 
-                       ;; General task collection not sure where to put it yet need processing
-                       ("tc" "Collect tasks for processing later" entry (file "Collection.org")
-                        "* TODO %? :%^{prompt|home|work|computer|school|errand}:
+      ;; destroy org-capture frame after kill
+      (defadvice org-capture-kill
+          (after delete-capture-frame activate)
+        "Advise capture-kill to close the frame"
+        (if (equal "Org Select" (frame-parameter nil 'name))
+            (delete-frame)))
+
+      ;; Keep org capture in single window
+      (defun widen-org-capture-buffer ()
+        (interactive)
+        "Make the org capture buffer take up the entire frame"
+        (delete-other-windows))
+      (advice-add 'org-capture :after #'widen-org-capture-buffer)
+
+      ;;Set the context tags(these tags represent where something can be done)
+      (setq org-tag-alist '(("home" . ?h)
+                            ("work" . ?w)
+                            ("computer" . ?c)
+                            ("school" . ?s)
+                            ("errand" . ?e)
+                            ("trip" . ?t)
+                            ("vacation" . ?v)))
+
+      ;; set your org capture templates here
+      (setq org-capture-templates
+
+            '(("t" "General task collection and generation")
+
+              ;; General task collection not sure where to put it yet need processing
+              ("tc" "Collect tasks for processing later" entry (file "Collection.org")
+               "* TODO %? :%^{prompt|home|work|computer|school|errand}:
      :PROPERTIES:
      :CREATED:  %U   :EXPIRY:   +1y
      :END:")
 
-                       ;; Collect anything that takes more than two actions here.
-                       ("tp" "Project tasks(two actions or more)" entry (file "Projects.org")
-                        "* TODO %? [/] :%^{prompt|home|work|computer|school|errand}:
+              ;; Collect anything that takes more than two actions here.
+              ("tp" "Project tasks(two actions or more)" entry (file "Projects.org")
+               "* TODO %? [/] :%^{prompt|home|work|computer|school|errand}:
      :PROPERTIES:
      :CREATED:  %U
      :EXPIRY:   +1y
      :END:")
 
-                       ;; Tasks with single actions
-                       ("ts" "Single action tasks" entry (file+headline "myGTD.org" "Tasks")
-                        "* TODO %? :%^{prompt|home|work|computer|school|errand}:
+              ;; Tasks with single actions
+              ("ts" "Single action tasks" entry (file+headline "myGTD.org" "Tasks")
+               "* TODO %? :%^{prompt|home|work|computer|school|errand}:
      :PROPERTIES:
      :CREATED:  %U
      :EXPIRY:   +1y
      :END:")
 
-                       ("u" "URL Capture")
+              ("u" "URL Capture")
 
-                       ("uu" "Capture URL and Title of current webpage for reference" entry (file "References.org")
-                        "* REFERENCE %? :url::
+              ("uu" "Capture URL and Title of current webpage for reference" entry (file "References.org")
+               "* REFERENCE %? :url::
      :PROPERTIES:
      :CREATED:  %U
      :EXPIRY:   +1y
      :END:
      %(shell-command-to-string \"xsel -bo\")")
 
-                       ("us" "Capture URL, Title and Selection of current webpage for reference" entry (file "References.org")
-                        "* REFERENCE %? :url::
+              ("us" "Capture URL, Title and Selection of current webpage for reference" entry (file "References.org")
+               "* REFERENCE %? :url::
      :PROPERTIES:
      :CREATED:  %U
      :EXPIRY:   +1y
      :END:
      %(shell-command-to-string \"xsel -bo\")  %x")
 
-                       ("ut" "Capture URL and Title of current webpage for a \"TODO\"" entry (file "Collection.org")
-                        "* TODO %? :url:%^{prompt|home|work|computer|school|errand}:
+              ("ut" "Capture URL and Title of current webpage for a \"TODO\"" entry (file "Collection.org")
+               "* TODO %? :url:%^{prompt|home|work|computer|school|errand}:
      :PROPERTIES:
      :CREATED:  %U
      :EXPIRY:   +1y
      :END:
      %(shell-command-to-string \"xsel -bo\")")
 
-                       ("ux" "Capture URL, Title and Selection of current webpage for a \"TODO\"" entry (file "Collection.org")
-                        "* TODO %? :url:%^{prompt|home|work|computer|school|errand}:
+              ("ux" "Capture URL, Title and Selection of current webpage for a \"TODO\"" entry (file "Collection.org")
+               "* TODO %? :url:%^{prompt|home|work|computer|school|errand}:
      :PROPERTIES:
      :CREATED:  %U
      :EXPIRY:   +1y
      :END:
      %(shell-command-to-string \"xsel -bo\")  %x")
 
-                       ("f" "Capture file links and region text")
+              ("f" "Capture file links and region text")
 
-                       ("ff" "Capture a file to REFERENCE" entry (file "References.org")
-                        "* REFERENCE %A :filelink:
+              ("ff" "Capture a file to REFERENCE" entry (file "References.org")
+               "* REFERENCE %A :filelink:
      :PROPERTIES:
      :CREATED:  %U
      :EXPIRY:   +1y
      :END:
   ")
 
-                       ;; link file to a reference entry
-                       ("fs" "Capture a file+region(selection) to REFERENCE" entry (file "References.org")
-                        "* REFERENCE %A
+              ;; link file to a reference entry
+              ("fs" "Capture a file+region(selection) to REFERENCE" entry (file "References.org")
+               "* REFERENCE %A
      :filelink:PROPERTIES:
      :CREATED:  %U
      :EXPIRY:   +1y
@@ -1012,9 +1053,9 @@
     %i
   ")
 
-                       ;; link file to a todo entry
-                       ("ft" "Capture a file TODO" entry (file "Collection.org")
-                        "* TODO %A :filelink:%^{prompt|home|work|computer|school|errand}:
+              ;; link file to a todo entry
+              ("ft" "Capture a file TODO" entry (file "Collection.org")
+               "* TODO %A :filelink:%^{prompt|home|work|computer|school|errand}:
      :PROPERTIES:
      :CREATED:  %U
      :EXPIRY:   +1y
@@ -1022,9 +1063,9 @@
    %i
   ")
 
-                       ;; link file to a todo entry
-                       ("fx" "Capture a file+region TODO" entry (file "Collection.org")
-                        "* TODO %A :filelink:%^{prompt|home|work|computer|school|errand}:
+              ;; link file to a todo entry
+              ("fx" "Capture a file+region TODO" entry (file "Collection.org")
+               "* TODO %A :filelink:%^{prompt|home|work|computer|school|errand}:
      :PROPERTIES:
      :CREATED:  %U
      :EXPIRY:   +1y
@@ -1032,22 +1073,22 @@
    %i
   ")
 
-                       ;; Holidays, Dentist, Doctor....
-                       ("c" "Calendar(main events)" entry (file+headline "myGTD.org" "Calendar")
-                        "* TODO %?
+              ;; Holidays, Dentist, Doctor....
+              ("c" "Calendar(main events)" entry (file+headline "myGTD.org" "Calendar")
+               "* TODO %?
      %^t
      :PROPERTIES:
      :CREATED:  %U
      :EXPIRY:   +1y
      :END:")
 
-                       ;;Add all fiscal due dates here e.g. taxes, credit card payments, insurance ...
-                       ("a" "Accounting")
+              ;;Add all fiscal due dates here e.g. taxes, credit card payments, insurance ...
+              ("a" "Accounting")
 
-                       ("ap" "Personal Account")
+              ("ap" "Personal Account")
 
-                       ("ape" "Input Expenses" entry (file "~/Documents/org/register.ledger.org")
-                        "* TODO %(my/ledger-get-payee-account-name)
+              ("ape" "Input Expenses" entry (file+olp+datetree "~/Documents/org/Personal.ledger.org")
+               "* TODO %(my/ledger-get-payee-account-name)
        :PROPERTIES:
        :CREATED:  %U
        :EXPIRY:   +1y
@@ -1055,8 +1096,8 @@
 
   %(my/ledger-return-org-capture-expenses-string)")
 
-                       ("apa" "Input Assets" entry (file "~/Documents/org/register.ledger.org")
-                        "* TODO %(my/ledger-get-payee-account-name)
+              ("apa" "Input Assets" entry (file+olp+datetree "~/Documents/org/Personal.ledger.org")
+               "* TODO %(my/ledger-get-payee-account-name)
        :PROPERTIES:
        :CREATED:  %U
        :EXPIRY:   +1y
@@ -1064,8 +1105,8 @@
 
   %(my/ledger-return-org-capture-assets-string)")
 
-                       ("apl" "Input Liabilities" entry (file "~/Documents/org/register.ledger.org")
-                        "* TODO %(my/ledger-get-payee-account-name)
+              ("apl" "Input Liabilities" entry (file+olp+datetree "~/Documents/org/Personal.ledger.org")
+               "* TODO %(my/ledger-get-payee-account-name)
        :PROPERTIES:
        :CREATED:  %U
        :EXPIRY:   +1y
@@ -1073,486 +1114,492 @@
 
   %(my/ledger-return-org-capture-liabilities-string)")
 
-                       ("aps" "Schedule a transaction")
+              ("aps" "Schedule a transaction")
 
-                       ("apse" "Expenses" entry (file "~/Documents/org/deadline.ledger.org")
-                        "* TODO %(my/ledger-get-payee-account-name) :%^{prompt|home|work|computer|school|errand}:
+              ("apse" "Expenses" entry (file+headline "~/Documents/org/deadline.ledger.org" "Personal Account")
+               "* TODO %(my/ledger-get-payee-account-name)
      DEADLINE: %^t
      :PROPERTIES:
      :CREATED:  %U
      :EXPIRY:   +1y
      :END:
 
-  %(my/ledger-return-org-capture-expenses-string")
+  %(my/ledger-return-org-capture-expenses-string)")
 
-                       ("apsa" "Assets" entry (file "~/Documents/org/deadline.ledger.org")
-                        "* TODO %(my/ledger-get-payee-account-name) :%^{prompt|home|work|computer|school|errand}:
+              ("apsa" "Assets" entry (file+headline "~/Documents/org/deadline.ledger.org" "Personal Account")
+               "* TODO %(my/ledger-get-payee-account-name)
      : %^t
      :PROPERTIES:
      :CREATED:  %U
      :EXPIRY:   +1y
      :END:
 
-  %(my/ledger-return-org-capture-assets-string")
+  %(my/ledger-return-org-capture-assets-string)")
 
-                       ("apsl" "Liabilities" entry (file "~/Documents/org/deadline.ledger.org")
-                        "* TODO %(my/ledger-get-payee-account-name) :%^{prompt|home|work|computer|school|errand}:
+              ("apsl" "Liabilities" entry (file+headline "~/Documents/org/deadline.ledger.org" "Personal Account")
+               "* TODO %(my/ledger-get-payee-account-name)
      : %^t
      :PROPERTIES:
      :CREATED:  %U
      :EXPIRY:   +1y
      :END:
 
-  %(my/ledger-return-org-capture-liabilities-string")
+  %(my/ledger-return-org-capture-liabilities-string)")
 
-                        ;; Not today for whatever reason, wishes maybe here.
-                        ("s" "Maybe someday?" entry (file "Someday.org")
-                         "* SOMEDAY %?
+              ;; Not today for whatever reason, wishes maybe here.
+              ("s" "Maybe someday?" entry (file "Someday.org")
+               "* SOMEDAY %?
      :PROPERTIES:
      :CREATED:  %U
      :EXPIRY:   +1y
      :END:")
 
-                        ;; Capture all those things borrowed with deadlines
-                        ("b" "Borrowed" entry (file+headline "myGTD.org" "Borrowed")
-                         "* TODO %?
+              ;; Capture all those things borrowed with deadlines
+              ("b" "Borrowed" entry (file+headline "myGTD.org" "Borrowed")
+               "* TODO %?
      SCHEDULED: %^t DEADLINE: %^t
      :PROPERTIES:
      :CREATED:  %U
      :EXPIRY:   +1y
      :END:")
 
-                        ;; Technical car stuff here
-                        ("m" "Car maintenance and repair" entry (file+headline "myGTD.org" "Car Maintenance/Repair")
-                         "* TODO %?
+              ;; Technical car stuff here
+              ("m" "Car maintenance and repair" entry (file+headline "myGTD.org" "Car Maintenance/Repair")
+               "* TODO %?
      SCHEDULED: %^t DEADLINE: %^t
      :PROPERTIES:
      :CREATED:  %U
      :EXPIRY:   +1y
      :END:")
 
-                        ;; This is where you put things that are waiting on other people
-                        ("w" "Waiting on someone, *not me*" entry (file "Waiting.org")
-                         "* WAITING %?
+              ;; This is where you put things that are waiting on other people
+              ("w" "Waiting on someone, *not me*" entry (file "Waiting.org")
+               "* WAITING %?
      :PROPERTIES:
      :CREATED:  %U
      :EXPIRY:   +1y
      :END:")
 
-                        ;; Capture a general reference
-                        ("r" "Capture a typed reference" entry (file "References.org")
-                         "* REFERENCE %?%^G
+              ;; Capture a general reference
+              ("r" "Capture a typed reference" entry (file "References.org")
+               "* REFERENCE %?%^G
      :PROPERTIES:
      :CREATED:  %U
      :EXPIRY:   +1y
      :END:")))
 
-                (setq org-capture-templates
-                      (append '(("l" "Ledger entries")
-                                ("lc" "Cash" plain
-                                 (file "~/Documents/journal.ledger")
-                                 (function return-capture-expense-template-also)
-                                 (function return-capture-expense-template)
-                                 :empty-lines-before 1
-                                 :empty-lines-after 1))
-                              org-capture-templates))
+      (setq org-capture-templates
+            (append '(("l" "Ledger entries")
+                      ("lc" "Cash" plain
+                       (file "~/Documents/journal.ledger")
+                       (function return-capture-expense-template-also)
+                       (function return-capture-expense-template)
+                       :empty-lines-before 1
+                       :empty-lines-after 1))
+                    org-capture-templates))
 
-                ;; Set my org agenda views here.
-                (setq org-agenda-custom-commands
-                      '(("x" "Agenda Block View"
-                         ((agenda)
-                          (org-agenda-files '("~/Documents/org/myGTD.org"
-                                              "~/Documents/org/Projects.org"))))
+      ;; Set my org agenda views here.
+      (setq org-agenda-custom-commands
+            '(("x" "Agenda Block View"
+               agenda
+               (org-agenda-files '("~/Documents/org/deadline.ledger.org"
+                                   "~/Documents/org/myGTD.org"
+                                   "~/Documents/org/Projects.org")))
 
-                        ("n" "NEXT todos"
-                         todo "NEXT")
+              ("n" "NEXT todos"
+               todo "NEXT")
 
-                        ("y" "Appointments" agenda*)
+              ("y" "Appointments" agenda*)
 
-                        ("c" "Computer todos"
-                         ((todo "NEXT")
-                          (todo "TODO"))
-                         ((org-agenda-tag-filter-preset '("+computer"))
-                          (org-agenda-files '("~/Documents/org/myGTD.org"
-                                              "~/Documents/org/Projects.org"))
-                          (org-agenda-category-filter-preset '("-Financial"
-                                                               "-Calendar"))))
+              ("c" "Computer todos"
+               ((todo "NEXT")
+                (todo "TODO"))
+               ((org-agenda-tag-filter-preset '("+computer"))
+                (org-agenda-files '("~/Documents/org/myGTD.org"
+                                    "~/Documents/org/Projects.org"))
+                (org-agenda-category-filter-preset '("-Financial"
+                                                     "-Calendar"))))
 
-                        ("h" "Home todos"
-                         ((todo "NEXT")
-                          (todo "TODO"))
-                         ((org-agenda-tag-filter-preset '("+home"))
-                          (org-agenda-files '("~/Documents/org/myGTD.org"
-                                              "~/Documents/org/Projects.org"))
-                          (org-agenda-category-filter-preset '("-Financial"
-                                                               "-Calendar"))))
+              ("h" "Home todos"
+               ((todo "NEXT")
+                (todo "TODO"))
+               ((org-agenda-tag-filter-preset '("+home"))
+                (org-agenda-files '("~/Documents/org/myGTD.org"
+                                    "~/Documents/org/Projects.org"))
+                (org-agenda-category-filter-preset '("-Financial"
+                                                     "-Calendar"))))
 
-                        ("w" "Work todos"
-                         ((todo "NEXT")
-                          (todo "TODO"))
-                         ((org-agenda-tag-filter-preset '("+work"))
-                          (rg-agenda-files '("~/Documents/org/myGTD.org"
-                                             "~/Documents/org/Projects.org"))
-                          (org-agenda-category-filter-preset '("-Financial"
-                                                               "-Calendar"))))
+              ("w" "Work todos"
+               ((todo "NEXT")
+                (todo "TODO"))
+               ((org-agenda-tag-filter-preset '("+work"))
+                (rg-agenda-files '("~/Documents/org/myGTD.org"
+                                   "~/Documents/org/Projects.org"))
+                (org-agenda-category-filter-preset '("-Financial"
+                                                     "-Calendar"))))
 
-                        ("e" "Errand todos"
-                         ((todo "NEXT")
-                          (todo "TODO"))
-                         ((org-agenda-tag-filter-preset '("+errand"))
-                          (org-agenda-files '("~/Documents/org/myGTD.org"
-                                              "~/Documents/org/Projects.org"))
-                          (org-agenda-category-filter-preset '("-Financial"
-                                                               "-Calendar"))))
+              ("e" "Errand todos"
+               ((todo "NEXT")
+                (todo "TODO"))
+               ((org-agenda-tag-filter-preset '("+errand"))
+                (org-agenda-files '("~/Documents/org/myGTD.org"
+                                    "~/Documents/org/Projects.org"))
+                (org-agenda-category-filter-preset '("-Financial"
+                                                     "-Calendar"))))
 
-                        ("s" "School todos"
-                         ((todo "NEXT")
-                          (todo "TODO"))
-                         ((org-agenda-tag-filter-preset '("+school"))
-                          (org-agenda-files '("~/Documents/org/myGTD.org"
-                                              "~/Documents/org/Projects.org"))
-                          (org-agenda-category-filter-preset '("-Financial"
-                                                               "-Calendar"))))
+              ("s" "School todos"
+               ((todo "NEXT")
+                (todo "TODO"))
+               ((org-agenda-tag-filter-preset '("+school"))
+                (org-agenda-files '("~/Documents/org/myGTD.org"
+                                    "~/Documents/org/Projects.org"))
+                (org-agenda-category-filter-preset '("-Financial"
+                                                     "-Calendar"))))
 
-                        ("i" "Collection"
-                         todo "TODO"
-                         ((org-agenda-files '("~/Documents/org/Collection.org"))))
+              ("i" "Collection"
+               todo "TODO"
+               ((org-agenda-files '("~/Documents/org/Collection.org"))))
 
-                        ("r" "References"
-                         todo "REFERENCE"
-                         ((org-agenda-files '("~/Documents/org/References.org"))))
+              ("r" "References"
+               todo "REFERENCE"
+               ((org-agenda-files '("~/Documents/org/References.org"))))
 
-                        ("o" "Someday"
-                         ((tags "NEXT")
-                          (todo "SOMEDAY"))
-                         ((org-agenda-files '("~/Documents/org/Someday.org"))))
+              ("o" "Someday"
+               ((tags "NEXT")
+                (todo "SOMEDAY"))
+               ((org-agenda-files '("~/Documents/org/Someday.org"))))
 
-                        ("v" "Waiting"
-                         todo "WAITING"
-                         ((org-agenda-files '("~/Documents/org/Waiting.org"))))
+              ("v" "Waiting"
+               todo "WAITING"
+               ((org-agenda-files '("~/Documents/org/Waiting.org"))))
 
-                        ("R" "What to read?"
-                         ((tags "NEXT")
-                          (todo "TODO"))
-                         ((org-agenda files '("~/Documents/org/Read.org"))))))
+              ("R" "What to read?"
+               ((tags "NEXT")
+                (todo "TODO"))
+               ((org-agenda files '("~/Documents/org/Read.org"))))
 
-                ;; Change todo to done when all of it's children are finished
-                (defun org-summary-todo (n-done n-not-done)
-                  "Switch entry to DONE when all subentries are done, to TODO otherwise."
-                  (let (org-log_done org-log-states) ;turn off logging
-                    (org-todo (if (= n-not-done 0) "DONE" "TODO"))))
+              ("d" "Delegated to someone else."
+               todo "DELEGATED"
+               ((org-agenda-files '("~/Documents/org/Delegated.org"))))))
 
-                ;; this is the hook that makes the todo change from the above.
-                (add-hook 'org-after-todo-statistics-hook 'org-summary-todo)
+      ;; Change todo to done when all of it's children are finished
+      (defun org-summary-todo (n-done n-not-done)
+        "Switch entry to DONE when all subentries are done, to TODO otherwise."
+        (let (org-log_done org-log-states) ;turn off logging
+          (org-todo (if (= n-not-done 0) "DONE" "TODO"))))
 
-                ;; set to nil to make org statistics cookie count todo entries in subtrees not
-                ;; just direct children.
-                (setq org-hierarchical-todo-statistics nil)
+      ;; this is the hook that makes the todo change from the above.
+      (add-hook 'org-after-todo-statistics-hook 'org-summary-todo)
 
-                ;;set the defautlt location for agenda files
-                (setq org-agenda-files '("~/Documents/org/myGTD.org"
-                                         "~/Documents/org/Projects.org"
-                                         "~/Documents/org/Collection.org"
-                                         "~/Documents/org/Read.org"
-                                         "~/Documents/org/Someday.org"
-                                         "~/Documents/org/References.org"))
+      ;; set to nil to make org statistics cookie count todo entries in subtrees not
+      ;; just direct children.
+      (setq org-hierarchical-todo-statistics nil)
 
-                ;; Projectile configuration
-                (with-eval-after-load 'org-agenda
-                  (require 'org-projectile)
-                  (mapcar (lambda (file)
-                            (when (file-exists-p file)
-                              (push file org-agenda-files)))
-                          (org-projectile-todo-files)))
+      ;;set the defautlt location for agenda files
+      (setq org-agenda-files '("~/Documents/org/myGTD.org"
+                               "~/Documents/org/Projects.org"
+                               "~/Documents/org/Collection.org"
+                               "~/Documents/org/Read.org"
+                               "~/Documents/org/Someday.org"
+                               "~/Documents/org/References.org"
+                               "~/Documents/org/deadline.ledger.org"))
+
+      ;; Projectile configuration
+      (with-eval-after-load 'org-agenda
+        (require 'org-projectile)
+        (mapcar (lambda (file)
+                  (when (file-exists-p file)
+                    (push file org-agenda-files)))
+                (org-projectile-todo-files)))
 
 
-                (defun my/org-projectile-project-todo-at-point()
-                  (interactive)
-                  (setq org-projectile-capture-template "* TODO %A :%^{prompt|home|work|computer|school|errand}:
+      (defun my/org-projectile-project-todo-at-point()
+        "Create a todo for a project with heading linked to file at point in project"
+        (interactive)
+        (setq org-projectile-capture-template "* TODO %A :%^{prompt|home|work|computer|school|errand}:
      :PROPERTIES:
      :CREATED:  %U
      :EXPIRY:   +1y
      :END:")
-                  (org-projectile-capture-for-current-project)
-                  (setq org-projectile-capture-template  "* TODO %? :%^{prompt|home|work|computer|school|errand}:
+        (org-projectile-capture-for-current-project)
+        (setq org-projectile-capture-template  "* TODO %? :%^{prompt|home|work|computer|school|errand}:
      :PROPERTIES:
      :CREATED:  %U
      :EXPIRY:   +1y
      :END:"))
 
-                (setq org-projectile-capture-template  "* TODO %? :%^{prompt|home|work|computer|school|errand}:
+      (setq org-projectile-capture-template  "* TODO %? :%^{prompt|home|work|computer|school|errand}:
      :PROPERTIES:
      :CREATED:  %U
      :EXPIRY:   +1y
      :END:")
 
-                ;; org-projectile keybindings go here
-                (global-set-key (kbd "C-c n p") 'org-projectile-project-todo-completing-read)
-                (global-set-key (kbd "C-c n P") 'org-projectile-capture-for-current-project)
-                (evil-define-key 'normal projectile-mode-map (kbd "C-c n a") 'my/org-projectile-project-todo-at-point)
+      ;; org-projectile keybindings go here
+      (global-set-key (kbd "C-c n p") 'org-projectile-project-todo-completing-read)
+      (global-set-key (kbd "C-c n P") 'org-projectile-capture-for-current-project)
+      (evil-define-key 'normal projectile-mode-map (kbd "C-c n a") 'my/org-projectile-project-todo-at-point)
 
-                ;; set the default location to store done tasks
-                ;; (setq org-archive-location "archive.org::")
+      ;; set the default location to store done tasks
+      ;; (setq org-archive-location "archive.org::")
 
-                ;; Don't erase all the meta info in the todo keep todo state and local tags
-                (setq org-archive-save-context-info '(todo ltags))
+      ;; Don't erase all the meta info in the todo keep todo state and local tags
+      (setq org-archive-save-context-info '(todo ltags))
 
-                ;; Allow subtrees with tag archive to be cycled normally ;; do this so only headings in the archive file are officially "archived".
-                ;; Use :ARCHIVE: to find old forgotten headings mark with org-expiry
-                (setq org-cycle-open-archived-trees t)
-                (setq org-sparse-tree-open-archived-trees t)
-                (setq org-agenda-skip-archived-trees nil)
-                (setq org-columns-skip-archived-trees nil)
-                (setq org-export-with-archived-trees t)
+      ;; Allow subtrees with tag archive to be cycled normally ;; do this so only headings in the archive file are officially "archived".
+      ;; Use :ARCHIVE: to find old forgotten headings mark with org-expiry
+      (setq org-cycle-open-archived-trees t)
+      (setq org-sparse-tree-open-archived-trees t)
+      (setq org-agenda-skip-archived-trees nil)
+      (setq org-columns-skip-archived-trees nil)
+      (setq org-export-with-archived-trees t)
 
-                ;;Function for exporting odt files from org files
-                (defun my/org-export-to-odt-and-open ()
-                  (interactive)
-                  (org-open-file (org-odt-export-to-odt)))
+      ;;Function for exporting odt files from org files
+      (defun my/org-export-to-odt-and-open ()
+        "Export org to odt and open it"
+        (interactive)
+        (org-open-file (org-odt-export-to-odt)))
 
-                ;; This function moves all "DONE" "SOMEDAY" "WAITING" "TODO"s in agenda files to corresponding org files
-                ;; (defun my/org-archive-multi-tasks ()
-                ;;   (interactive)
-                ;;   (loop for (lowercase-todo-type  uppercase-todo-type) in '(("Trash" "/GONE")
-                ;;                                                             ("Trash" "/TRASH")
-                ;;                                                             ("Trash" "/DISPOSED")
-                ;;                                                             ("Trash" "/CANCELLED")
-                ;;                                                             ("Waiting" "/WAITING")
-                ;;                                                             ("Delegated" "/DELEGATED"))
+      (setq my/org-archive-collection-file-list '("~/Documents/org/myGTD.org"
+                                                  "~/Documents/org/Collection.org"
+                                                  "~/Documents/org/Someday.org"
+                                                  "~/Documents/org/Read.org"))
 
-                ;;         ;; Create string with variables to set org-archive-location
-                ;;         do (setq org-archive-location (concat lowercase-todo-type ".org::"))
-                ;;         (setq org-collection-file-list '("~/Documents/org/myGTD.org"
-                ;;                                          "~/Documents/org/Collection.org"
-                ;;                                          "~/Documents/org/References.org"
-                ;;                                          "~/Documents/org/Someday.org"))
+      (setq my/ledger-org-archive-collection-file-list '("~/Documents/org/deadline.ledger.org"))
 
-                ;;         (org-map-entries
-                ;;          (lambda ()
-                ;;            (org-archive-subtree)
-                ;;            (setq org-map-continue-from (outline-previous-heading)))
-                ;;          uppercase-todo-type org-collection-file-list))
+      (defun my/org-archive-all-done-todos ()
+        "Archive all done todos in my/org-archive-collection-file-list"
+        (interactive)
+        (let ((count 0))
+          (dolist (element (list my/org-archive-collection-file-list
+                                 my/ledger-org-archive-collection-file-list))
+            (org-map-entries
+             (lambda ()
+               (if (eq count 1)
+                   (my/ledger-org-insert-done-or-created-date)
+                 (message "count 0"))
+               (org-archive-subtree)
+               (setq org-map-continue-from (outline-previous-heading)))
+             "/DONE" element)
+            (setq count (+ 1 count)))))
 
-                ;;   (setq org-archive-location '%s_archive::))
+      ;; set autofill in org-mode for word processor like wordwrap functionality.
+      (add-hook 'org-mode-hook
+                (lambda ()
+                  ;; Enable fill column indicator
+                  (fci-mode t)
+                  ;; Set fill column to whatever you want
+                  (setq fill-column 80)
+                  (setq yas-indent-line "fixed")
+                  ;;enable automatic line wrapping at fill column
+                  (auto-fill-mode t)
+                  (flyspell-mode 1)))
 
-                ;; set autofill in org-mode for word processor like wordwrap functionality.
-                (add-hook 'org-mode-hook
-                          (lambda ()
-                            ;; Enable fill column indicator
-                            (fci-mode t)
-                            ;; Set fill column to whatever you want
-                            (setq fill-column 80)
-                            (setq yas-indent-line "fixed")
-                            ;;enable automatic line wrapping at fill column
-                            (auto-fill-mode t)
-                            (flyspell-mode 1)))
+      ;; Set up org-refile targets here
+      (setq org-refile-targets (quote (("myGTD.org" :level . 1)
+                                       ("Projects.org" :maxlevel . 1)
+                                       ("Someday.org" :level . 0)
+                                       ("Waiting.org" :level . 0)
+                                       ("References.org" :level . 0)
+                                       ("Delegated.org" :level . 0)
+                                       ("Read.org" :level . 0)
+                                       ("deadline.ledger.org" :level . 1)
+                                       ("Personal.ledger.org" :level . 0))))
 
-                ;; Set up org-refile targets here
-                (setq org-refile-targets (quote (("myGTD.org::Tasks" :level . 1)
-                                                 ("myGTD.org::Calendar" :level . 1)
-                                                 ("myGTD.org::Car Maintenance/Repair" :level . 1)
-                                                 ("Projects.org" :maxlevel . 1)
-                                                 ("Someday.org" :level . 0)
-                                                 ("Waiting.org" :level . 0)
-                                                 ("References.org" :level . 0)
-                                                 ("Delegated.org" :level . 0)
-                                                 ("Read.org" :level . 0)
-                                                 ("deadline.ledger.org" :level . 0)
-                                                 ("register.ledger.org" :level . 0))))
+      ;; set to nil so org refile shows all possible targets in helm at one time
+      (setq org-outline-path-complete-in-steps nil)
 
-                ;; set to nil so org refile shows all possible targets in helm at one time
-                (setq org-outline-path-complete-in-steps nil)
+      ;; Set to true to allow org-refile to create new nodes as new parents in org files.
+      (setq org-refile-allow-creating-parent-nodes t)
+      (setq org-refile-use-outline-path 'file)
 
-                ;; Set to true to allow org-refile to create new nodes as new parents in org files.
-                (setq org-refile-allow-creating-parent-nodes t)
-                (setq org-refile-use-outline-path 'file)
+      ;;Org-crypt (setq org-tags-exclude-from-inheritance (quote ("crypt")))
+      ;; Todo I need to set this key up and pinentry
+      (setq org-crypt-key "emacs-journal")
+      ;; GPG key to use for encryption
+      ;; Either the key id or set to nil to use symmetric encryption
+      ;; Attention must add:
+      ;; # -*- buffer-auto-save-file-name: nil; -*-
+      ;; to top of org files with encryption or youll get an
+      ;; annoying message. You could also turn off auto save globally like this:
+      ;; (setq auto-save-default nil)
 
-                ;;Org-crypt (setq org-tags-exclude-from-inheritance (quote ("crypt")))
-                ;; Todo I need to set this key up and pinentry
-                (setq org-crypt-key "emacs-journal")
-                ;; GPG key to use for encryption
-                ;; Either the key id or set to nil to use symmetric encryption
-                ;; Attention must add:
-                ;; # -*- buffer-auto-save-file-name: nil; -*-
-                ;; to top of org files with encryption or youll get an
-                ;; annoying message. You could also turn off auto save globally like this:
-                ;; (setq auto-save-default nil)
+      (defun my/org-expiry-delete-archive-reset ()
+        (interactive "c/Delete, Archive, Reset:"
+                     (cond ((char-equal ?D my-expiry-choice)
+                            '(org-cut-subtree))
+                           ((char-equal ?d my-expiry-choice)
+                            '(org-cut-subtree))
+                           ((char-equal ?A my-expiry-choice)
+                            '(org-archive-subtree))
+                           ((char-equal ?a my-expiry-choice)
+                            '(org-archive-subtree))
+                           ((char-equal ?R my-expiry-choice)
+                            '(org-expiry-insert-created))
+                           ((char-equal ?r my-expiry-choice)
+                            '(org-expiry-insert-created &optional t))
+                           (t (message "Unrecognized option bad char!")))))
 
-                (defun my/org-expiry-delete-archive-reset ()
-                  (interactive "c/Delete, Archive, Reset:"
-                               (cond ((char-equal ?D my-expiry-choice)
-                                      '(org-cut-subtree))
-                                     ((char-equal ?d my-expiry-choice)
-                                      '(org-cut-subtree))
-                                     ((char-equal ?A my-expiry-choice)
-                                      '(org-archive-subtree))
-                                     ((char-equal ?a my-expiry-choice)
-                                      '(org-archive-subtree))
-                                     ((char-equal ?R my-expiry-choice)
-                                      '(org-expiry-insert-created))
-                                     ((char-equal ?r my-expiry-choice)
-                                      '(org-expiry-insert-created &optional t))
-                                     (t (message "Unrecognized option bad char!")))))
+      ;; Create a variable for the expiry property
+      (setq org-expiry-expiry-property-name "EXPIRY")
 
-                ;; Create a variable for the expiry property
-                (setq org-expiry-expiry-property-name "EXPIRY")
+      ;; Set the function to run when calling org-expiry
+      (setq org-expiry-handler-function 'org-expiry-add-keyword)
 
-                ;; Set the function to run when calling org-expiry
-                (setq org-expiry-handler-function 'org-expiry-add-keyword)
+      ;; "create" help r function for my/org-expiry-add-timestamp-1y-expiry ()
+      (defun my/org-expiry-helper-insert-create ()
+        (interactive)
+        (save-excursion
+          (org-back-to-heading)
+          (org-expiry-insert-created)))
 
-                ;; "create" help r function for my/org-expiry-add-timestamp-1y-expiry ()
-                (defun my/org-expiry-helper-insert-create ()
-                  (interactive)
-                  (save-excursion
-                    (org-back-to-heading)
-                    (org-expiry-insert-created)))
+      ;; "insert" helper function for my/org-expiry-add-timestamp-1y-expiry ()
+      (defun my/org-expiry-helper-insert-expiry ()
+        (save-excursion
+          (org-entry-put (point)
+                         org-expiry-expiry-property-name
+                         timestr)))
 
-                ;; "insert" helper function for my/org-expiry-add-timestamp-1y-expiry ()
-                (defun my/org-expiry-helper-insert-expiry ()
-                  (save-excursion
-                    (org-entry-put
-                     (point) org-expiry-expiry-property-name timestr)))
+      ;; Add expiry mechanism to emacs items will expire in one year at which time
+      ;; you may check for expired entries with M-x org-expiry-process-entries.
+      (defun my/org-expiry-add-timestamp-1y-expiry ()
+        (interactive)
+        (save-excursion
+          (when (string= (org-get-todo-state) "TODO")
+            (let* ((d (org-entry-get (point)
+                                     org-expiry-expiry-property-name)))
 
-                ;; Add expiry mechanism to emacs items will expire in one year at which time
-                ;; you may check for expired entries with M-x org-expiry-process-entries.
-                (defun my/org-expiry-add-timestamp-1y-expiry ()
-                  (interactive)
-                  (save-excursion
-                    (when (string= (org-get-todo-state) "TODO")
-                      (let* ((d (org-entry-get (point) org-expiry-expiry-property-name)))
-                        (setq timestr "1y")
-                        (my/org-expiry-helper-insert-create)
-                        (my/org-expiry-helper-insert-expiry)))))
+              (setq timestr "1y")
+              (my/org-expiry-helper-insert-create)
+              (my/org-expiry-helper-insert-expiry)))))
 
-                ;; Set timestamps inactive so everything doesn't show up in the agenda
-                (setq org-expiry-inactive-timestamps t)
+      ;; Set timestamps inactive so everything doesn't show up in the agenda
+      (setq org-expiry-inactive-timestamps t)
 
-                (add-hook 'org-after-todo-state-change-hook 'my/org-expiry-add-timestamp-1y-expiry)
+      (add-hook 'org-after-todo-state-change-hook 'my/org-expiry-add-timestamp-1y-expiry)
 
-                ;; Add hook to insert timestamp when todo state is changed the heading is set to "TODO"
+      ;; Add hook to insert timestamp when todo state is changed the heading is set to "TODO"
 
-                ;; Make org treat isert of todo as state change
-                ;; so that org-expire will automatically insert
-                ;; a "CREATED" "EXPIRED" tag.
-                (setq org-treat-insert-todo-heading-as-state-change t)
+      ;; Make org treat isert of todo as state change
+      ;; so that org-expire will automatically insert
+      ;; a "CREATED" "EXPIRED" tag.
+      (setq org-treat-insert-todo-heading-as-state-change t)
 
-                ;; Set the amount of days org should start warning you before a deadline
-                (setq org-deadline-warning-days 2)
+      ;; Set the amount of days org should start warning you before a deadline
+      (setq org-deadline-warning-days 2)
 
-                ;; Don't show scheduled items that are already "DONE".
-                (setq org-agenda-skip-scheduled-if-done t)
-                (setq org-agenda-skip-deadline-if-done t)
-                (setq org-agenda-skip-timestamp-if-done t))
-
+      ;; Don't show scheduled items that are already "DONE".
+      (setq org-agenda-skip-scheduled-if-done t)
+      (setq org-agenda-skip-deadline-if-done t)
+      (setq org-agenda-skip-timestamp-if-done t))
 #+end_src
 
 *** mu4e
     
 #+begin_src elisp :tangle init.el :comments link
-              (setq mu4e-maildir "~/.mail"
-                    mu4e-trash-folder "/gmail/[Gmail]/Trash"
-                    mu4e-refile-folder "/gmail/email_archive"
-                    mu4e-get-mail-command "mbsync -a"
-                    mu4e-update-interval nil
-                    mu4e-compose-signature-auto-include t
-                    mu4e-view-show-images t
-                    mu4e-view-show-addresses t
-                    mu4e-sent-folder "/gmail/[Gmail]/Sent Mail"
-                    mu4e-drafts-folder "/gmail/[Gmail]/Drafts"
-                    ;; Gmail does this see mu4e-sent-messages behavior to configure
-                    ;;for additional non gmail accounts
-                    mu4e-sent-messages-behavior 'delete
-                    user-mail-address "jaredwrd951@gmail.com"
-                    user-full-name "Jared Ward"
-                    mu4e-compose-signature
-                    (concat
-                     "Jared M. Ward\n"
-                     "Portland, OR")
-                    message-send-mail-function 'message-send-mail-with-sendmail
-                    sendmail-program "/usr/bin/msmtp"
-                    ;;Use the correct account context when sending mail based on the from header
-                    message-sendmail-extra-arguments '("--read-envelope-from")
-                    message-sendmail-f-is-evil 't
-                    mu4e-attachment-dir "/home/jroddius/Download"
-                    mu4e-change-filenames-when-moving t)
+  (setq mu4e-maildir "~/.mail"
+        mu4e-trash-folder "/gmail/[Gmail]/Trash"
+        mu4e-refile-folder "/gmail/email_archive"
+        mu4e-get-mail-command "mbsync -a"
+        mu4e-update-interval nil
+        mu4e-compose-signature-auto-include t
+        mu4e-view-show-images t
+        mu4e-view-show-addresses t
+        mu4e-sent-folder "/gmail/[Gmail]/Sent Mail"
+        mu4e-drafts-folder "/gmail/[Gmail]/Drafts"
+        ;; Gmail does this see mu4e-sent-messages behavior to configure
+        ;;for additional non gmail accounts
+        mu4e-sent-messages-behavior 'delete
+        user-mail-address "jaredwrd951@gmail.com"
+        user-full-name "Jared Ward"
+        mu4e-compose-signature
+        (concat
+         "Jared M. Ward\n"
+         "Portland, OR")
+        message-send-mail-function 'message-send-mail-with-sendmail
+        sendmail-program "/usr/bin/msmtp"
+        ;;Use the correct account context when sending mail based on the from header
+        message-sendmail-extra-arguments '("--read-envelope-from")
+        message-sendmail-f-is-evil 't
+        mu4e-attachment-dir "/home/jroddius/Download"
+        mu4e-change-filenames-when-moving t)
 
-                                                    ;(add-hook 'message-send-mail-hook 'choose-msmtp-account)
+                                        ;(add-hook 'message-send-mail-hook 'choose-msmtp-account)
 
-              (setq mu4e-maildir-shortcuts
-                    '(("/gmail/primary/" . ?p)
-                      ("/gmail/promotions/" . ?P)
-                      ("/gmail/social_email/" . ?s)
-                      ("/gmail/forums_email/" . ?f)
-                      ("/gmail/Family/" . ?F)
-                      ("/gmail/Work/" . ?w)
-                      ("/gmail/email_updates/" . ?u)
-                      ("/gmail/[Gmail]/Drafts/" . ?d)
-                      ("/gmail/[Gmail]/Sent Mail/" . ?S)
-                      ("/gmail/[Gmail]/Spam/" . ?!)
-                      ("/gmail/[Gmail]/Trash/" . ?t)))
+  (setq mu4e-maildir-shortcuts
+        '(("/gmail/primary/" . ?p)
+          ("/gmail/promotions/" . ?P)
+          ("/gmail/social_email/" . ?s)
+          ("/gmail/forums_email/" . ?f)
+          ("/gmail/Family/" . ?F)
+          ("/gmail/Work/" . ?w)
+          ("/gmail/email_updates/" . ?u)
+          ("/gmail/[Gmail]/Drafts/" . ?d)
+          ("/gmail/[Gmail]/Sent Mail/" . ?S)
+          ("/gmail/[Gmail]/Spam/" . ?!)
+          ("/gmail/[Gmail]/Trash/" . ?t)))
 #+end_src
 
 *** auto-completion
     
 #+begin_src elisp :tangle init.el :comments link
-              ;; make company the global auto-completion plugin
-              (global-company-mode)
+  ;; make company the global auto-completion plugin
+  (global-company-mode)
 
-              ;;configures nicer looking faces for auto-completion
-              (custom-set-faces
-               '(company-tooltip-common
-                 ((t (:inherit company-tooltip :weight bold :underline nil))))
-               '(company-tooltip-common-selection
-                 ((t (:inherit company-tooltip-selection :weight bold :underline nil)))))
+  ;;configures nicer looking faces for auto-completion
+  (custom-set-faces
+   '(company-tooltip-common
+     ((t (:inherit company-tooltip :weight bold :underline nil))))
+   '(company-tooltip-common-selection
+     ((t (:inherit company-tooltip-selection :weight bold :underline nil)))))
 
-              ;;set the delay of autocompletion here 0 means instant
-              (setq company-idle-delay 0)
-
+  ;;set the delay of autocompletion here 0 means instant
+  (setq company-idle-delay 0)
 #+end_src
 
 *** Arch linux 
 
 #+begin_src elisp :tangle init.el :comments link
-               ;;Add a pkgbuild mode for Arch linux packages
-               (use-package pkgbuild-mode)
-
+  ;;Add a pkgbuild mode for Arch linux packages
+  (use-package pkgbuild-mode)
 #+end_src
 
 *** laTex
 
 #+begin_src elisp :tangle init.el :comments link
-               ;;Auto update pdf preview when file recompiled
-               (add-hook 'doc-view-mode-hook 'auto-revert-mode)
+  ;;Auto update pdf preview when file recompiled
+  (add-hook 'doc-view-mode-hook 'auto-revert-mode)
 
-               ;; Theming set backgound theme so terminal mode is transparent
-               (defun set-background-for-terminal (&optional frame)
-                 (or frame (setq frame (selected-frame)))
-                 "unsets the background color in terminal mode"
-                 (if (display-graphic-p frame)
-                     (spacemacs/enable-transparency) (set-face-background 'default "unspecified-bg" frame)))
-               (add-hook 'after-make-frame-functions 'set-background-for-terminal)
-               (add-hook 'window-setup-hook 'set-background-for-terminal)
+  ;; Theming set backgound theme so terminal mode is transparent
+  (defun set-background-for-terminal (&optional frame)
+    (or frame (setq frame (selected-frame)))
+    "unsets the background color in terminal mode"
+    (if (display-graphic-p frame)
+        (spacemacs/enable-transparency) (set-face-background 'default "unspecified-bg" frame)))
+  (add-hook 'after-make-frame-functions 'set-background-for-terminal)
+  (add-hook 'window-setup-hook 'set-background-for-terminal)
 
-               ;; fix for pdf-tools auto revert specified by author https://github.com/politza/pdf-tools#known-problems
-               (add-hook 'Tex-after-compilation-finished-function #'Tex-revert-document-buffer)
+  ;; fix for pdf-tools auto revert specified by author https://github.com/politza/pdf-tools#known-problems
+  (add-hook 'Tex-after-compilation-finished-function #'Tex-revert-document-buffer)
 
-               ;; open buffers in emacs automatically
-               (find-file-noselect "~/Documents/org/myGTD.org")
-               (find-file-noselect "~/Documents/org/Projects.org")
-               (find-file-noselect "~/Documents/org/Collection.org")
-               (find-file-noselect "~/Documents/org/References.org")
-               (find-file-noselect "~/Documents/org/Read.org")
-               (find-file-noselect "~/Documents/org/Delegated.org")
-               (find-file-noselect "~/Documents/org/Waiting.org")
-               (find-file-noselect "~/Documents/org/Someday.org")
+  ;; open buffers in emacs automatically
+  (find-file-noselect "~/Documents/org/myGTD.org")
+  (find-file-noselect "~/Documents/org/Personal.ledger.org")
+  (find-file-noselect "~/Documents/org/Projects.org")
+  (find-file-noselect "~/Documents/org/Collection.org")
+  (find-file-noselect "~/Documents/org/References.org")
+  (find-file-noselect "~/Documents/org/Read.org")
+  (find-file-noselect "~/Documents/org/Delegated.org")
+  (find-file-noselect "~/Documents/org/Waiting.org")
+  (find-file-noselect "~/Documents/org/Someday.org")
+  (find-file-noselect "~/Documents/org/deadline.ledger.org")
 
-               ;; Set defaul browser for emacs to call
-               (setq browse-url-browser-function 'browse-url-generic
-                     browse-url-generic-program "qutebrowser")
 
-               ;; Spaceline configuration
-               )
+  ;; Set defaul browser for emacs to call
+  (setq browse-url-browser-function 'browse-url-generic
+        browse-url-generic-program "qutebrowser")
 
+  ;; Spaceline configuration
+  )
      #+end_src    
 
 ** This is where *emacs* will auto generate custom variable definitions
@@ -1598,5 +1645,4 @@
      '(company-tooltip-common ((t (:inherit company-tooltip :weight bold :underline nil))))
      '(company-tooltip-common-selection ((t (:inherit company-tooltip-selection :weight bold :underline nil)))))
     )
-
 #+end_src
