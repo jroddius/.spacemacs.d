@@ -34,8 +34,10 @@
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '((python :variables python-backend 'anaconda)
+   '(systemd
+     (python :variables python-backend 'anaconda)
      php
+     ;;gtags
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
      ;; Uncomment some layer names and press `SPC f e R' (Vim style) or
@@ -151,6 +153,8 @@
                                       helm-pass
                                       password-store
                                       pkgbuild-mode
+                                      oauth2
+                                      org-caldav
                                         ;<2018-09-09 Sun>;frames-only-mode
                                       )
 
@@ -542,7 +546,6 @@ configuration.
 It is mostly for variables that should be set before packages are loaded.
 If you are unsure, try setting them in `dotspacemacs/user-config' first."
   ;; set the default outside program to use for spellchecking with flycheck.
-  (setq ispell-program-name "/usr/bin/hunspell")
   )
 ;; dotspacemacs/user-init:1 ends here
 
@@ -564,98 +567,294 @@ Put your configuration code here, except for variables that should be set
 before packages are loaded."
 ;; dotspacemacs/user-config:1 ends here
 
+;; [[file:~/.spacemacs.d/spacemacs.org::*Key%20Bindings][Key Bindings:1]]
+
+  ;; Misc Utilities
+
+  ;; Calendar sync with google
+  (defun get-caldav-oauth-client-id ()
+    (let (( id (split-string (shell-command-to-string "pass -s secret gmail_jaredwrd951@gmail.com/caldav-secret | grep clientid | awk '{print $2}'") "\n")))
+    (message (nth 0 id))))
+
+  (defun get-caldav-oauth-client-secret ()
+    (let (( secret (split-string (shell-command-to-string "pass -s secre gmail_jaredwrd951@gmail.com/caldav-secret | grep secret | awk '{print $2}'") "\n")))
+      (message (nth 0 secret))))
+
+  (setq org-caldav-url 'google
+        org-caldav-calendar-id "jaredwrd951@gmail.com"
+        org-icalendar-timezone "PST"
+        org-caldav-files '("~/Documents/org/myGTD.org")
+        org-icalendar-use-deadline (quote ('todo-due))
+        org-icalendar-use-scheduled (quote ('todo-start))
+        plstore-encrypt-to "secret-recipes"
+        org-caldav-inbox "~/Documents/org/Calendar.org")
+  (defvar org-caldav-oauth2-client-id 'get-caldav-oauth-client-id)
+  (defvar org-caldav-oauth2-client-secret 'get-caldav-oauth-client-secret)
+
+  (current-time-zone)
+  ;; clear the kill ring
+  (defun my/clear-kill-ring ()
+    (interactive)
+    (setq kill-ring nil))
+
+  (define-key evil-normal-state-map (kbd "C-k") 'my/clear-kill-ring)
+
+
+;; Key bindings go here.
+(with-eval-after-load 'evil-maps
+  ;;Misc key bindings
+  (define-key evil-normal-state-map (kbd "C-e") 'evil-scroll-up)
+
+  ;; pass-archive key bindings
+  (define-key evil-normal-state-map (kbd "SPC A p l") 'my/password-store-lock-archive)
+  (define-key evil-normal-state-map (kbd "SPC A p u") 'my/password-store-unlock-archive)
+  ;; org key bindings
+  (define-key evil-normal-state-map (kbd "SPC a S") 'org-save-all-org-buffers)
+  (define-key evil-normal-state-map (kbd "SPC a O") 'org-switchb)
+  (define-key evil-normal-state-map (kbd "SPC a o A") 'my/org-archive-all-done-todos)
+  (define-key evil-normal-state-map (kbd ", d C") 'my/org-change-closed-date)
+  (define-key evil-normal-state-map (kbd ", d c") 'my/org-change-created-date)
+  ;; add some key bindings for langtool
+  (spacemacs/set-leader-keys "SPC L" 'langtool)
+  (define-key evil-normal-state-map (kbd "SPC L w") 'langtool-check)
+  (define-key evil-normal-state-map (kbd "SPC L w") 'langtool-check-done)
+  (define-key evil-normal-state-map (kbd "SPC L l") 'langtool-switch-default-language)
+  (define-key evil-normal-state-map (kbd "SPC L x") 'langtool-show-message-at-point)
+  (define-key evil-normal-state-map (kbd "SPC L c") 'langtool-correct-buffer)
+)
+;; Key Bindings:1 ends here
+
+(setq my/password-store-directory "${HOME}/.password-store")
+;; Password-store configuration
+
+(defun my/password-store-unlock-archive ()
+  (interactive)
+  (shell-command "pass-archive unlock"))
+
+(defun my/password-store-lock-archive ()
+  (interactive)
+  (shell-command "pass-archive lock"))
+
+;; All of these are in password-store.el
+
+;; (defun my/password-store-edit ()
+;;   (interactive)
+;;   (shell-command "pass-archive unlock")
+;;   (password-store-edit (password-store--completing-read)))
+
+;; (defun my/password-store-init ()
+;;   (interactive)
+;;   (shell-command "pass-archive unlock")
+;;   (password-store-init (read-string "GPG ID: "))
+;;   (shell-command "pass-archive lock"))
+
+;; (defun my/password-store-insert ()
+;;   (interactive)
+;;   (shell-command "pass-archive unlock")
+;;   (password-store-insert (read-string "Password entry: ") (read-passwd "Password: " t))
+;;   (shell-command "pass-archive lock"))
+;; (defun my/password-store-copy ()
+;;   (interactive)
+;;   (shell-command "pass-archive unlock")
+;;   (password-store-copy (password-store--completing-read))
+;;   (shell-command "pass-archive lock"))
+
+;; (defun my/password-store-generate ()
+;;   (interactive)
+;;   (shell-command "pass-archive unlock")
+;;   (password-store-generate (read-string "Password entry: ") (when current-prefix-arg
+;;                                                               (abs (prefix-numeric-value current-prefix-arg))))
+;;   (shell-command "pass-archive lock"))
+
+;; (defun my/password-store-remove ()
+;;   (interactive)
+;;   (shell-command "pass-archive unlock")
+;;   (password-store-remove (password-store--completing-read))
+;;   (shell-command "pass-archive lock"))
+
+;; (defun my/password-store-rename ()
+;;   (interactive)
+;;   (shell-command "pass-archive unlock")
+;;   (password-store-rename (password-store--completing-read) (read-string "Rename entry to: "))
+;;   (shell-command "pass-archive lock"))
+
+;; (defun my/password-store-remove ()
+;;   (interactive)
+;;   (shell-command "pass-archive unlock")
+;;   (password-store-remove (password-store--completing-read))
+;;   (shell-command "pass-archive lock"))
+
+;; (defun my/password-store-url ()
+;;   (interactive)
+;;   (shell-command "pass-archive unlock")
+;;   (password-store-url (password-store--completing-read))
+;;   (shell-command "pass-archive lock"))
+
 ;; [[file:~/.spacemacs.d/spacemacs.org::*Ledger%20Mode][Ledger Mode:1]]
 ;; ledger-mode setup
-  (autoload 'ledger-mode "ledger-mode" "A major mode for Ledger" t)
-  (add-to-list 'auto-mode-alist '("\\.ledger$" . ledger-mode))
 
 
   (add-hook 'ledger-mode-hook
             (lambda ()
               (setq yas-indent-line "fixed")
-              (my/ledger-create-list-of-accounts-for-each-type)
-              (my/ledger-create-payee-list)))
+              (my/ledger-create-list-of-payees-or-accounts-for-each-type)))
 
   ;; Set this to a file containing or naming all ledger accounts
-  (setq ledger-accounts-file "~/Documents/org/Personal.ledger")
+  (setq my/ledger-org-accounts-file "~/Documents/org/Personal.ledger.org")
 
-  ;; Created with ledger-accounts-list
-  (defun my/ledger-create-payee-list ()
-    "Return a list of all known payee names as strings.
-Looks in `ledger-accounts-file' if set, otherwise the current buffer."
-    (setq my/ledger-payee-list
-          (if ledger-accounts-file
-              (let ((f ledger-accounts-file))
-                (with-temp-buffer
-                  (insert-file-contents f)
-                  (my/ledger-payees-list-in-buffer)))
-            (my/ledger-payees-list-in-buffer))))
+  (setq my/ledger-list-of-account-types '("Personal:Assets"
+                                          "Personal:Expenses"
+                                          "Personal:Liabilities"
+                                          "Personal:Income"
+                                          "Personal:Equity"))
 
-  ;;Created with ledger-account-list-in-buffer
-  (defun my/ledger-payees-list-in-buffer ()
-    "Return a list of all known payee names in the current buffer as strings."
-    (save-excursion
-      (goto-char (point-min))
-      (let (results)
-        (while (re-search-forward ledger-payee-any-status-regex nil t)
-          (setq results (cons (match-string-no-properties 3) results)))
-        (ledger-accounts-deduplicate-sorted
-         (sort results #'ledger-string-greaterp)))))
+  (defun my/ledger-create-list-of-payees-or-accounts-for-each-type ()
+    "Returns a list of accounts named after each element in
+'my/ledger-list-of-account-types'. If PAYEE-OR-ACCOUNT is 'payee' then return
+a payee list and if PAYEE-OR-ACCOUNT is 'account' then return a list of accounts."
+    (dolist (payee-or-account '("payee" "account"))
+      (dolist (account-type my/ledger-list-of-account-types)
+        (let ((temp-string-list (split-string account-type ":")))
+          (set
+           (intern
+            (concat "my/ledger-"
+                    (nth 0 temp-string-list)
+                    "-"
+                    (nth 1 temp-string-list)
+                    "-"
+                    payee-or-account
+                    "-list"))
+           (delete ""
+                   (split-string
+                    (shell-command-to-string
+                     (concat "~/Documents/org/scripts/ledger-get-"
+                             payee-or-account
+                             "-names-by-type "
+                             account-type
+                             " "
+                             my/ledger-org-accounts-file))
+                    "\n"))))))
 
-  (defun my/ledger-get-payee-account-name ()
-    "Get the name of the payee for the ledger transaction and append to list if
-not present additions to list will not be available after emacs is restarted.
-Update the ledger-accounts-file to make addition permanent"
-    (let ((payee (message "%s" (helm-comp-read "What is the name of the Payee? " my/ledger-payee-list :fuzzy t))))
-      (add-to-list 'my/ledger-payee-list payee)
-      (setq my/ledger-payee-account-name payee)))
+    (setq ledger-accounts-file "/home/jroddius/Documents/org/Personal.ledger")
+    (setq my/ledger-Personal-Payment-payee-list
+          (append my/ledger-Personal-Assets-payee-list
+                  my/ledger-Personal-Liabilities-payee-list
+                  '("Jared Ward")))
+
+    (setq my/ledger-Personal-Income-Assets-Liabilities-payee-list
+          (append my/ledger-Personal-Assets-payee-list
+                  my/ledger-Personal-Liabilities-payee-list
+                  my/ledger-Personal-Income-payee-list
+                  '("Jared Ward")))
+
+    (setq my/ledger-Personal-Payment-account-list
+          (append my/ledger-Personal-Assets-account-list
+                  my/ledger-Personal-Liabilities-account-list
+                  '("Personal:Expenses:Cash")))
+
+    (setq my/ledger-Personal-Income-Assets-Liabilities-account-list
+          (append my/ledger-Personal-Assets-account-list
+                  my/ledger-Personal-Liabilities-account-list
+                  my/ledger-Personal-Income-account-list
+                  '("Personal:Expenses:Cash"))))
+
+  (defun my/ledger-get-payee-and-account-name (available-payees-list
+                                               available-accounts-list)
+    (setq my/ledger-payee
+          (helm-comp-read "What is the name of the Payee? "
+                          available-payees-list
+                          :fuzzy t))
+    (let ((matched-accounts-list
+           (delete ""
+                   (split-string
+                    (shell-command-to-string
+                     (concat
+                      "~/Documents/org/scripts/ledger-get-account-name-by-payee \""
+                      my/ledger-payee
+                      "\" "
+                      my/ledger-org-accounts-file))
+                    "\n"))))
+        (if matched-accounts-list
+            (if (= 1 (safe-length matched-accounts-list))
+                (setq my/ledger-account (nth 0 matched-accounts-list))
+              (setq my/ledger-account
+                    (helm-comp-read "Under which account would you like this payee to reside."
+                                    (append matched-accounts-list
+                                            ""
+                                            available-accounts-list)
+                                    :fuzzy t)))
+          (setq my/ledger-account
+                (helm-comp-read "Under which account would you like this payee to reside"
+                                available-accounts-list
+                                :fuzzy t)))
+        (if (not (seq-some (lambda (accounts-string)
+                             (string= accounts-string my/ledger-account))
+                           available-accounts-list))
+            (progn (push my/ledger-account my/ledger-add-this-account-list)))
+
+        (if (not (seq-some (lambda (payee-element)
+                             (string= payee-element my/ledger-payee))
+                           available-payees-list))
+            (progn (push my/ledger-account my/ledger-add-this-payee-list)
+                   (push my/ledger-payee my/ledger-add-this-payee-list))))
+    (message my/ledger-payee))
+
+  (setq my/ledger-add-this-payee-list nil)
+  (setq my/ledger-add-this-account-list nil)
+  (setq my/ledger-symbol "$")
 
   (defun my/ledger-how-much-are-you-paying ()
     "Get the amount that is to be paid in the ledger transaction"
-    (message "%s" (read-string "How much money would you like to pay? ")))
+    (setq my/ledger-how-much-you-said-to-pay
+          (concat my/ledger-symbol (read-string "How much money would you like to pay? "))))
+;;(my/ledger-insert-new-account)
+  (defun my/ledger-insert-new-account ()
+    (dolist (new-account my/ledger-add-this-account-list)
+      (shell-command (concat "~/Documents/org/scripts/ledger-insert-new-account \""
+                             new-account
+                             "\" "
+                             my/ledger-org-accounts-file)))
+    (my/ledger-create-list-of-payees-or-accounts-for-each-type)
+    (setq my/ledger-add-this-account-list '()))
 
-  (defun my/ledger-get-account-list-by-type-regexp (account)
-    "Get account list by type using the pass regular expression passed to 'account'"
-    (let ((value)
-          (list (ledger-accounts-list)))
-      (dolist (element list value)
-        (if (string-match account element)
-            (setq value (cons element value))))))
+  (defun my/ledger-insert-new-payee ()
+    (let ((i 1))
+      (dolist (payee-name my/ledger-add-this-payee-list)
+        (if (= 1 (% i 2))
+            (shell-command
+             (concat "~/Documents/org/scripts/ledger-insert-new-payee \""
+                     (nth i my/ledger-add-this-payee-list)
+                     "\" "
+                     my/ledger-org-accounts-file
+                     " \""
+                     payee-name "\"")))
+        (incf i)))
+    (my/ledger-create-list-of-payees-or-accounts-for-each-type)
+    (setq my/ledger-add-this-payee-list '()))
 
-  ;; Set ledger account types list and list variable names
-  (setq my/list-of-account-types '(("Expenses" . "my/ledger-expenses-account-name-list")
-                                   ("Assets" . "my/ledger-assets-account-name-list")
-                                   ("Liabilities" . "my/ledger-liabilities-account-name-list")
-                                   ("Income" . "my/ledger-income-account-name-list")
-                                   ("Equity" . "my/ledger-equity-account-name-list")))
+  (defun my/ledger-return-org-capture-string (available-debited-payees-list
+                                              available-debited-accounts-list)
+    (let ((inhibit-modification-hooks t))
+      (let ((temp-string (concat "#+begin_src ledger :noweb-ref "
+                                 (downcase
+                                  (nth 1 (split-string my/ledger-account ":")))
+                                 " :comments link\n"
+                                 (format-time-string "%Y/%m/%d" (current-time)) " " my/ledger-payee "\n  "
+                                 my/ledger-account
+                                 "                                 "
+                                 my/ledger-how-much-you-said-to-pay "\n  ")))
+        (my/ledger-get-payee-and-account-name available-debited-payees-list
+                                              available-debited-accounts-list)
+        (concat temp-string
+                my/ledger-account
+                "  ; Payee: "
+                my/ledger-payee
+                "\n"
+                "#+end_src"))))
 
-  (defun my/ledger-return-org-capture-expenses-string ()
-    (concatenate 'string "#+begin_src ledger :tangle Personal.ledger :comments link\n" ; must put space at beginning of string or the syntax will be wrong.
-                 (format-time-string "%Y/%m/%d" (current-time)) " " my/ledger-payee-account-name "\n  "
-                 (my/ledger-get-expenses-account-name)
-                 "                                 "
-                 (my/ledger-how-much-are-you-paying) "\n  "
-                 (my/ledger-get-payment-account-name) "\n"
-                 "#+end_src")) ; must put space at beginning of string or the syntax will be wrong.
-
-  (defun my/ledger-return-org-capture-assets-string ()
-    (concatenate 'string "#+begin_src ledger :tangle Personal.ledger :comments link\n" ; must put space at beginning of string or the syntax will be wrong.
-                 (format-time-string "%Y/%m/%d" (current-time)) " " my/ledger-payee-account-name "\n  "
-                 (my/ledger-get-assets-account-name)
-                 "                                 "
-                 (my/ledger-how-much-are-you-paying) "\n  "
-                 (my/ledger-get-income-assets-liabilities-account-name) "\n"
-                 "#+end_src")) ; must put space at beginning of string or the syntax will be wrong.
-
-  (defun my/ledger-return-org-capture-liabilities-string ()
-    (concatenate 'string "#+begin_src ledger :tangle Personal.ledger :comments link\n" ; must put space at beginning of string or the syntax will be wrong.
-                 (format-time-string "%Y/%m/%d" (current-time)) " " my/ledger-payee-account-name "\n  "
-                 (my/ledger-get-liabilities-account-name)
-                 "                                 "
-                 (my/ledger-how-much-are-you-paying) "\n  "
-                 (my/ledger-get-payment-account-name) "\n"
-                 "#+end_src")) ; must put space at beginning of string or the syntax will be wrong.
-
+  (defun my/org-capture-create-url-and-title-list ()
+    (setq my/org-capture-url-and-title-list (delete "" (split-string (shell-command-to-string "xsel -bo") "[|\n]")))
+    (nth 0 my/org-capture-url-and-title-list))
 
   (defun my/ledger-insert-yasnippet-template ()
     (interactive)
@@ -664,55 +863,6 @@ Update the ledger-accounts-file to make addition permanent"
     (evil-digit-argument-or-evil-beginning-of-line)
     (my/ledger-get-payee-account-name)
     (yas-insert-snippet))
-
-  (defun my/ledger-create-list-of-accounts-for-each-type ()
-    "Return a list for each account in the accounts type list"
-    (dolist (type my/list-of-account-types)
-      (set (intern (cdr type))
-           (my/ledger-get-account-list-by-type-regexp (car type)))))
-
-  (defun my/ledger-get-account-name-completion (account-list prompt)
-    "Get an account name using regexp with completion"
-    (message "%s" (ido-completing-read prompt account-list)))
-
-  (defun my/ledger-get-expenses-account-name ()
-    "Use completing and return an expense account name"
-    (let ((expense (message "%s" (helm-comp-read "What are you paying for? " my/ledger-expenses-account-name-list :fuzzy t))))
-      (add-to-list 'my/ledger-expenses-account-name-list expense)
-      (setq my/ledger-expenses-account-name expense)))
-
-  (defun my/ledger-get-equity-account-name ()
-    "Use completing and return an equity account name"
-    (let ((equity (message "%s" (helm-comp-read "Pick an equity account? " my/ledger-equity-account-name-list :fuzzy t))))
-      (add-to-list 'my/ledger-equity-account-name-list equity)
-      (setq my/ledger-equity-account-name expense)))
-
-  (defun my/ledger-get-assets-account-name ()
-    "Use completing and return an assets account name"
-    (let ((assets (message "%s" (helm-comp-read "Pick an asset? " my/ledger-assets-account-name-list :fuzzy t))))
-      (add-to-list 'my/ledger-assets-account-name-list assets)
-      (setq my/ledger-assets-account-name assets)))
-
-  (defun my/ledger-get-liabilities-account-name ()
-    "Use completing and return a liabilities account name"
-    (let ((liabilities (message "%s" (helm-comp-read "Pick a liability? " my/ledger-liabilities-account-name-list :fuzzy t))))
-      (add-to-list 'my/ledger-liabilities-account-name-list liabilities)
-      (setq my/ledger-liabilities-account-name liabilities)))
-  (setq debug-on-error t)
-  (defun my/ledger-get-payment-account-name ()
-    "Use completing and return a payment account name"
-    (let ((payment-list (append my/ledger-assets-account-name-list
-                                my/ledger-liabilities-account-name-list)))
-      (let ((payment (message "%s" (helm-comp-read "Pick a liability? " payment-list :fuzzy t))))
-        (setq my/ledger-payment-account-name payment))))
-
-  (defun my/ledger-get-income-assets-liabilities-account-name ()
-    "Use completing and return a income, assets and liabilities account name"
-    (let ((payment-list (append my/ledger-income-account-name-list
-                                my/ledger-assets-account-name-list
-                                my/ledger-liabilities-account-name-list)))
-      (let ((payment (message "%s" (helm-comp-read "Pick an asset, income, or liability: " payment-list :fuzzy t))))
-        (setq my/ledger-income-assets-liabilities-account-name payment))))
 ;; Ledger Mode:1 ends here
 
 ;; [[file:~/.spacemacs.d/spacemacs.org::*default%20variables][default variables:1]]
@@ -737,7 +887,7 @@ Update the ledger-accounts-file to make addition permanent"
     (frame-keys-mode nil)))
 
 ;; Have Calendar always open in the same frame
-(push '("*Calendar*" . ((display-buffer-same-window display-buffer-pop-up-window) .
+(push '("\*?Calendar\*?" . ((display-buffer-at-bottom display-buffer-pop-up-window) .
                         ((inhibit-switch-frame . t))))
       frame-mode-display-buffer-alist)
 ;; frame-mode:1 ends here
@@ -763,26 +913,17 @@ Update the ledger-accounts-file to make addition permanent"
       langtool-default-language "en-US")
 (require 'langtool)
 
-;; ;; add some keybindings for langtool
-(spacemacs/set-leader-keys "SPC L" 'langtool)
-(define-key evil-normal-state-map (kbd "SPC L w") 'langtool-check)
-(define-key evil-normal-state-map (kbd "SPC L w") 'langtool-check-done)
-(define-key evil-normal-state-map (kbd "SPC L l") 'langtool-switch-default-language)
-(define-key evil-normal-state-map (kbd "SPC L x") 'langtool-show-message-at-point)
-(define-key evil-normal-state-map (kbd "SPC L c") 'langtool-correct-buffer)
 ;; langtool:1 ends here
 
 ;; [[file:~/.spacemacs.d/spacemacs.org::*org-mode][org-mode:1]]
 (with-eval-after-load 'org
 
-    (setq org-src-tab-acts-natively t)
-    ;; set key bindings for org here.
-    (define-key evil-normal-state-map (kbd "SPC a S") 'org-save-all-org-buffers)
-    (define-key evil-normal-state-map (kbd "SPC a O") 'org-switchb)
-
-    (evil-define-key 'normal org-mode-map (kbd ", O") 'org-switchb)
-    (evil-define-key 'normal org-mode-map (kbd ", S") 'org-save-all-org-buffers)
-    (evil-define-key 'normal org-mode-map (kbd ", b m") 'org-edit-src-code)
+  (setq org-src-tab-acts-natively t)
+  ;; set key bindings for org here.
+  (evil-define-key 'normal org-mode-map (kbd ", O") 'org-switchb)
+  (evil-define-key 'normal org-mode-map (kbd ", S") 'org-save-all-org-buffers)
+  (evil-define-key 'normal org-mode-map (kbd ", b m") 'org-edit-src-code)
+  (evil-define-key 'normal org-mode-map (kbd ", s o") 'my/org-archive-all-done-todos)
 
     ;;set the directory where all your org files will be stored.
     (setq org-directory "~/Documents/org")
@@ -809,60 +950,40 @@ Update the ledger-accounts-file to make addition permanent"
     (defun my/ledger-org-insert-done-or-created-date ()
       "Get done date from org CLOSED property and replace the date in the babel ledger source block under the same heading. Replace with CREATED date if not CLOSED."
       (interactive)
-      ;(save-excursion
-        (if (not (my/org-check-if-heading-is-CLOSED))
-            (re-search-forward "CREATED"))
-         (evil-forward-WORD-begin)
-         (evil-forward-word-begin)
-         (let ((point1 (point)))
-           (evil-forward-WORD-end)
-           (let ((point2 (+ 1 (point))))
-             (re-search-forward "[[:space:]]?2?0?[0-9][0-9]\/[0-1][0-9]\/[0-3][0-9]")
-            (let ((point3 (point)))
-              (evil-backward-WORD-begin)
-              (evil-delete (point) point3))
-            (let ((temp-string (buffer-substring point1 point2)))
-              (message temp-string)
-                 (let ((temp-string-list (split-string temp-string "-")))
-                       (insert (concatenate 'string (nth 0 temp-string-list)
-                                                      "/"
-                                                      (nth 1 temp-string-list)
-                                                      "/"
-                                                      (nth 2 temp-string-list))))))))
-
-    (defun my/org-check-if-heading-is-CLOSED ()
-      "Check if the headline is closed if it is return true otherwise false"
-      (org-back-to-heading)
-      (org-down-element)
-      (evil-forward-word-begin)
-      (let ((point1 (point)))
-        (evil-forward-word-end)
-        (let ((temp-point (point)))
-          (let((point2 (+ 1 temp-point)))
-            (string= "CLOSED" (buffer-substring point1 point2))))))
+      (save-excursion
+        (org-back-to-heading)
+        (org-down-element)
+        (let ((date-string))
+          (if (not (re-search-forward "CLOSED: [[]\\(2[0-1][0-9][0-9]-[0-1][0-9]-[0-3][0-9]\\)"
+                                      (point-at-eol) t))
+              (re-search-forward ":CREATED: *[[]\\(2[0-1][0-9][0-9]-[0-1][0-9]-[0-3][0-9]\\)"))
+          (setq date-string (match-string 1))
+          (message date-string)
+          (let ((temp-string-list (split-string date-string "-")))
+            (re-search-forward "2[0-1][0-9][0-9]\/[0-1][0-9]\/[0-3][0-9]")
+            (replace-match
+             (concat (nth 0 temp-string-list)
+                     "/"
+                     (nth 1 temp-string-list)
+                     "/"
+                     (nth 2 temp-string-list)) nil "/1")))))
 
     (defun my/org-change-closed-date ()
       (interactive)
-      (my/org-change-closed-or-created-date nil))
+      (save-excursion
+        (let ((inhibit-modification-hooks t))
+          (org-back-to-heading)
+          (forward-line)
+          (if (re-search-forward "CLOSED: [[]2[0-1][0-9][0-9]-[0-1]" (point-at-eol))
+              (org-time-stamp-inactive)))))
 
     (defun my/org-change-created-date ()
       (interactive)
-      (my/org-change-closed-or-created-date t))
-
-    (defun my/org-change-closed-or-created-date (created)
       (save-excursion
-        (org-back-to-heading)
-        (if created
-            (progn (re-search-forward "CREATED")
-                   (evil-forward-WORD-begin)
-                   (org-time-stamp-inactive t))
-          (if (my/org-check-if-heading-is-CLOSED)
-              (progn (org-down-element)
-                     (evil-forward-WORD-begin 2)
-                     (evil-forward-word-begin)
-                     (evil-forward-char)
-                     (org-time-stamp-inactive t))
-            (message "Headline not in 'DONE' state, unable to insert new date.")))))
+        (let ((inhibit-modification-hooks t))
+          (org-back-to-heading)
+          (if (re-search-forward "^ *:CREATED: *[[]2[0-1][0-9][0-9]-[0-3][0-9]")
+              (org-time-stamp-inactive)))))
 
     ;;set the org journal directory here
     (setq org-journal-dir "journal")
@@ -881,9 +1002,9 @@ Update the ledger-accounts-file to make addition permanent"
     (setq org-catch-invisible-edits 'smart)
 
     ;; Set the org default bibliography
-    (setq org-ref-default-bibliography '("~/Documents/org/References.bib")
-          org-ref-pdf-direcory "~/Documents/org"
-          org-ref-bibliography-notes "~/Documents/org/References.org::Bibliography")
+    ;; (setq org-ref-default-bibliography '("~/Documents/org/References.bib")
+    ;;       org-ref-pdf-direcory "~/Documents/org"
+    ;;       org-ref-bibliography-notes "~/Documents/org/References.org::Bibliography")
 
     ;; add different bullets to org
     (setq org-bullets-bullet-list '("■" "○" "▶" "✿"))
@@ -911,7 +1032,7 @@ Update the ledger-accounts-file to make addition permanent"
                       "GONE")))
 
     ;; set the default org capture file
-    (setq org-default-notes-file "~/Documents/org/Collection.org")
+    (setq org-default-notes-file "~/Documents/org/myGTD.org")
 
     ;;destroy org-capture frame after finalization
     (defadvice org-capture-finalize
@@ -949,187 +1070,222 @@ Update the ledger-accounts-file to make addition permanent"
           '(("t" "General task collection and generation")
 
             ;; General task collection not sure where to put it yet need processing
-            ("tc" "Collect tasks for processing later" entry (file "Collection.org")
-             "* TODO %? :%^{prompt|home|work|computer|school|errand}:
-   :PROPERTIES:
-   :CREATED:  %U   :EXPIRY:   +1y
-   :END:")
-
-            ;; Collect anything that takes more than two actions here.
-            ("tp" "Project tasks(two actions or more)" entry (file "Projects.org")
-             "* TODO %? [/] :%^{prompt|home|work|computer|school|errand}:
+            ("tc" "Collect tasks for processing later" entry (file"Collection.org")
+             "* TODO %{prompt} :%^{prompt|home|work|computer|school|errand}:
    :PROPERTIES:
    :CREATED:  %U
    :EXPIRY:   +1y
-   :END:")
+   :END:
+   %?")
+
+            ;; Collect anything that takes more than two actions here.
+            ("tp" "Project tasks(two actions or more)" entry (file+headline "myGTD.org" "Projects")
+             "* TODO %{prompt} [/] :%^{prompt|home|work|computer|school|errand}:refile-target:
+   :PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :END:
+   %?")
 
             ;; Tasks with single actions
             ("ts" "Single action tasks" entry (file+headline "myGTD.org" "Tasks")
-             "* TODO %? :%^{prompt|home|work|computer|school|errand}:
+             "* TODO %{prompt} :%^{prompt|home|work|computer|school|errand}:
    :PROPERTIES:
    :CREATED:  %U
    :EXPIRY:   +1y
-   :END:")
+   :END:
+   %?")
 
             ("u" "URL Capture")
 
-            ("uu" "Capture URL and Title of current webpage for reference" entry (file "References.org")
-             "* REFERENCE %? :url::
+            ("uu" "Capture URL and Title of current webpage for reference" entry (file+headline "myGTD.org" "References")
+             "* REFERENCE [[%(my/org-capture-create-url-and-title-list)][%^{prompt}]] :url:
    :PROPERTIES:
    :CREATED:  %U
    :EXPIRY:   +1y
+   :TITLE:    %(nth 1 my/org-capture-url-and-title-list)
    :END:
-   %(shell-command-to-string \"xsel -bo\")")
+   %?")
 
-            ("us" "Capture URL, Title and Selection of current webpage for reference" entry (file "References.org")
-             "* REFERENCE %? :url::
+            ("us" "Capture URL, Title and Selection of current webpage for reference" entry (file+headline "myGTD.org" "References")
+             "* REFERENCE [[%(my/org-capture-create-url-and-title-list)][%^{prompt}]] :url:
    :PROPERTIES:
    :CREATED:  %U
    :EXPIRY:   +1y
+   :TITLE:    %(nth 1 my/org-capture-url-and-title-list)
    :END:
-   %(shell-command-to-string \"xsel -bo\")  %x")
+   %?")
 
             ("ut" "Capture URL and Title of current webpage for a \"TODO\"" entry (file "Collection.org")
-             "* TODO %? :url:%^{prompt|home|work|computer|school|errand}:
+             "* TODO [[%(my/org-capture-create-url-and-title-list)][%^{prompt}]] :url:%^{prompt|home|work|computer|school|errand}:
    :PROPERTIES:
    :CREATED:  %U
    :EXPIRY:   +1y
+   :TITLE:    %(nth 1 my/org-capture-url-and-title-list)
    :END:
-   %(shell-command-to-string \"xsel -bo\")")
+   %?")
 
             ("ux" "Capture URL, Title and Selection of current webpage for a \"TODO\"" entry (file "Collection.org")
-             "* TODO %? :url:%^{prompt|home|work|computer|school|errand}:
+             "* TODO [[%(my/org-capture-create-url-and-title-list)][%^{prompt}]] :url:%^{prompt|home|work|computer|school|errand}:
    :PROPERTIES:
    :CREATED:  %U
    :EXPIRY:   +1y
+   :TITLE:    %(nth 1 my/org-capture-url-and-title-list)
    :END:
-   %(shell-command-to-string \"xsel -bo\")  %x")
+   %?")
+            ("uh" "Capture URL, Title and the html webpage for reference." entry (file+headline "myGTD.org" "References")
+             "* REFERENCE [[%(my/org-capture-create-url-and-title-list)][%^{prompt}]]
+   :PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :TITLE:    %(nth 1 my/org-capture-url-and-title-list)
+   :END:
+   [[%(nth 2 my/org-capture-url-and-title-list)][%(nth 1 my/org-capture-url-and-title-list)]]")
+
+            ("uH" "Capture URL, Title and the html webpage for a TODO." entry (file+headline "myGTD.org" "Collection")
+             "* REFERENCE [[%(my/org-capture-create-url-and-title-list)][%^{prompt}]]
+   :PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :TITLE:    %(nth 1 my/org-capture-url-and-title-list)
+   :END:
+   [[%(nth 2 my/org-capture-url-and-title-list)][%(nth 1 my/org-capture-url-and-title-list)]]")
 
             ("f" "Capture file links and region text")
 
-            ("ff" "Capture a file to REFERENCE" entry (file "References.org")
+            ("ff" "Capture a file to REFERENCE" entry (file+headline "myGTD.org" "References")
              "* REFERENCE %A :filelink:
-   :PROPERTIES:
-   :CREATED:  %U
+   :PROPERTIES: :CREATED:  %U
    :EXPIRY:   +1y
    :END:
-")
+   %?")
 
             ;; link file to a reference entry
-            ("fs" "Capture a file+region(selection) to REFERENCE" entry (file "References.org")
-             "* REFERENCE %A
+            ("fs" "Capture a file+region(selection) to REFERENCE" entry (file+headline "myGTD.org" "References")
+             "* REFERENCE %A :filelink:
    :filelink:PROPERTIES:
    :CREATED:  %U
    :EXPIRY:   +1y
    :END:
-  %i
-")
+   %?
+   %i")
 
             ;; link file to a todo entry
             ("ft" "Capture a file TODO" entry (file "Collection.org")
-             "* TODO %A :filelink:%^{prompt|home|work|computer|school|errand}:
+             "* TODO %A %^{prompt|home|work|computer|school|errand}:filelink:
    :PROPERTIES:
    :CREATED:  %U
    :EXPIRY:   +1y
    :END:
- %i
-")
+   %?
+   %i")
 
             ;; link file to a todo entry
             ("fx" "Capture a file+region TODO" entry (file "Collection.org")
-             "* TODO %A :filelink:%^{prompt|home|work|computer|school|errand}:
+             "* TODO %A :%^{prompt|home|work|computer|school|errand}:filelink:
    :PROPERTIES:
    :CREATED:  %U
    :EXPIRY:   +1y
    :END:
- %i
-")
+   %?
+   %i")
 
             ;; Holidays, Dentist, Doctor....
             ("c" "Calendar(main events)" entry (file+headline "myGTD.org" "Calendar")
-             "* TODO %?
+             "* TODO %{prompt}
    %^t
    :PROPERTIES:
    :CREATED:  %U
    :EXPIRY:   +1y
-   :END:")
+   :END:
+   %?")
 
             ;;Add all fiscal due dates here e.g. taxes, credit card payments, insurance ...
             ("a" "Accounting")
 
             ("ap" "Personal Account")
 
-            ("ape" "Input Expenses" entry (file+olp+datetree "~/Documents/org/Personal.ledger.org")
-             "* TODO %(my/ledger-get-payee-account-name)
+            ("ape" "Expenses" entry (file+datetree "~/Documents/org/Personal.ledger.org")
+             "* TODO %(my/ledger-get-payee-and-account-name my/ledger-Personal-Expenses-payee-list my/ledger-Personal-Expenses-account-list) %(my/ledger-how-much-are-you-paying) :ledger:
+   :PROPERTIES:
+   :CREATED:  %U
+   :EXPIRY:   +1y
+   :END:
+%?
+%(my/ledger-return-org-capture-string my/ledger-Personal-Payment-payee-list my/ledger-Personal-Payment-account-list)")
+
+            ("apa" "Input Assets" entry (file+datetree "~/Documents/org/Personal.ledger.org")
+             "* %(my/ledger-get-payee-and-account-name my/ledger-Personal-Assets-payee-list my/ledger-Personal-Assets-account-list) %(my/ledger-how-much-are-you-paying) :ledger:
      :PROPERTIES:
      :CREATED:  %U
      :EXPIRY:   +1y
      :END:
+%?
+%(my/ledger-return-org-capture-string my/ledger-Personal-Income-Assets-Liabilities-payee-list my/ledger-Personal-Income-Assets-Liabilities-account-list)")
 
-%(my/ledger-return-org-capture-expenses-string)")
-
-            ("apa" "Input Assets" entry (file+olp+datetree "~/Documents/org/Personal.ledger.org")
-             "* TODO %(my/ledger-get-payee-account-name)
+            ("apl" "Input Liabilities" entry (file+datetree "~/Documents/org/Personal.ledger.org")
+             "* %(my/ledger-get-payee-and-account-name my/ledger-Personal-Liabilities-payee-list my/ledger-Personal-Liabilities-account-list) %(my/ledger-how-much-are-you-paying) :ledger:
      :PROPERTIES:
      :CREATED:  %U
      :EXPIRY:   +1y
      :END:
+%?
+%(my/ledger-return-org-capture-string my/ledger-Personal-Payment-payee-list my/ledger-Personal-Payment-account-list)")
 
-%(my/ledger-return-org-capture-assets-string)")
-
-            ("apl" "Input Liabilities" entry (file+olp+datetree "~/Documents/org/Personal.ledger.org")
-             "* TODO %(my/ledger-get-payee-account-name)
+            ("apx" "Input Equity" entry (file+datetree "~/Documents/org/Personal.ledger.org")
+             "* %(my/ledger-get-payee-and-account-name my/ledger-Personal-Equity-payee-list my/ledger-Personal-Equity-account-list) %(my/ledger-how-much-are-you-paying) :ledger:
      :PROPERTIES:
      :CREATED:  %U
      :EXPIRY:   +1y
      :END:
-
-%(my/ledger-return-org-capture-liabilities-string)")
+%?
+%(my/ledger-return-org-capture-string my/ledger-Personal-Income-Assets-Liabilities-payee-list my/ledger-Personal-Income-Assets-Liabilities-account-list)")
 
             ("aps" "Schedule a transaction")
 
-            ("apse" "Expenses" entry (file+headline "~/Documents/org/deadline.ledger.org" "Personal Account")
-             "* TODO %(my/ledger-get-payee-account-name)
+            ("apse" "Expenses" entry (file+olp "~/Documents/org/myGTD.org" "Ledger" "Personal Account")
+             "* TODO %(my/ledger-get-payee-and-account-name my/ledger-Personal-Expenses-payee-list my/ledger-Personal-Expenses-account-list) %(my/ledger-how-much-are-you-paying) :ledger:
    DEADLINE: %^t
    :PROPERTIES:
    :CREATED:  %U
    :EXPIRY:   +1y
    :END:
+%?
+%(my/ledger-return-org-capture-string my/ledger-Personal-Payment-payee-list my/ledger-Personal-Payment-account-list)")
 
-%(my/ledger-return-org-capture-expenses-string)")
-
-            ("apsa" "Assets" entry (file+headline "~/Documents/org/deadline.ledger.org" "Personal Account")
-             "* TODO %(my/ledger-get-payee-account-name)
-   : %^t
+            ("apsa" "Assets" entry (file+olp "~/Documents/org/myGTD.org" "Ledger" "Personal Account")
+             "* TODO %(my/ledger-get-payee-and-account-name my/ledger-Personal-Assets-payee-list my/ledger-Personal-Assets-account-list) %(my/ledger-how-much-are-you-paying) :ledger:
+   DEADLINE: %^t
    :PROPERTIES:
    :CREATED:  %U
    :EXPIRY:   +1y
    :END:
+%?
+%(my/ledger-return-org-capture-string my/ledger-Personal-Income-Assets-Liabilities-payee-list my/ledger-Personal-Income-Assets-Liabilities-account-list)")
 
-%(my/ledger-return-org-capture-assets-string)")
-
-            ("apsl" "Liabilities" entry (file+headline "~/Documents/org/deadline.ledger.org" "Personal Account")
-             "* TODO %(my/ledger-get-payee-account-name)
-   : %^t
+            ("apsl" "Liabilities" entry (file+olp "~/Documents/org/myGTD.org" "Ledger" "Personal Account")
+             "* TODO %(my/ledger-get-payee-and-account-name my/ledger-Personal-Liabilities-payee-list my/ledger-Personal-Liabilities-account-list) %(my/ledger-how-much-are-you-paying) :ledger:
+   DEADLINE: %^t
    :PROPERTIES:
    :CREATED:  %U
    :EXPIRY:   +1y
    :END:
+%?
+%(my/ledger-return-org-capture-string my/ledger-Personal-Payment-payee-list my/ledger-Personal-Payment-account-list)")
 
-%(my/ledger-return-org-capture-liabilities-string)")
+            ("apsx" "Equity" entry (file+olp "~/Documents/org/Personal.ledger.org" "Ledger" "Personal Account")
+             "* %(my/ledger-get-payee-and-account-name my/ledger-Personal-Equity-payee-list my/ledger-Personal-Equity-account-list) %(my/ledger-how-much-are-you-paying) :ledger:
+     DEADLINE: %^t
+     :PROPERTIES:
+     :CREATED:  %U
+     :EXPIRY:   +1y
+     :END:
+%?
+%(my/ledger-return-org-capture-string my/ledger-Personal-Income-Assets-Liabilities-payee-list my/ledger-Personal-Income-Assets-Liabilities-account-list)")
 
             ;; Not today for whatever reason, wishes maybe here.
-            ("s" "Maybe someday?" entry (file "Someday.org")
+            ("s" "Maybe someday?" entry (file+headline "myGTD.org" "Someday")
              "* SOMEDAY %?
-   :PROPERTIES:
-   :CREATED:  %U
-   :EXPIRY:   +1y
-   :END:")
-
-            ;; Capture all those things borrowed with deadlines
-            ("b" "Borrowed" entry (file+headline "myGTD.org" "Borrowed")
-             "* TODO %?
-   SCHEDULED: %^t DEADLINE: %^t
    :PROPERTIES:
    :CREATED:  %U
    :EXPIRY:   +1y
@@ -1145,7 +1301,7 @@ Update the ledger-accounts-file to make addition permanent"
    :END:")
 
             ;; This is where you put things that are waiting on other people
-            ("w" "Waiting on someone, *not me*" entry (file "Waiting.org")
+            ("w" "Waiting on someone, *not me*" entry (file+headline "myGTD.org" "Waiting")
              "* WAITING %?
    :PROPERTIES:
    :CREATED:  %U
@@ -1153,32 +1309,16 @@ Update the ledger-accounts-file to make addition permanent"
    :END:")
 
             ;; Capture a general reference
-            ("r" "Capture a typed reference" entry (file "References.org")
+            ("r" "Capture a typed reference" entry (file+headline "myGTD.org" "References")
              "* REFERENCE %?%^G
    :PROPERTIES:
    :CREATED:  %U
    :EXPIRY:   +1y
    :END:")))
 
-    (setq org-capture-templates
-          (append '(("l" "Ledger entries")
-                    ("lc" "Cash" plain
-                     (file "~/Documents/journal.ledger")
-                     (function return-capture-expense-template-also)
-                     (function return-capture-expense-template)
-                     :empty-lines-before 1
-                     :empty-lines-after 1))
-                  org-capture-templates))
-
     ;; Set my org agenda views here.
     (setq org-agenda-custom-commands
-          '(("x" "Agenda Block View"
-             agenda
-             (org-agenda-files '("~/Documents/org/deadline.ledger.org"
-                                 "~/Documents/org/myGTD.org"
-                                 "~/Documents/org/Projects.org")))
-
-            ("n" "NEXT todos"
+          '(("n" "NEXT todos"
              todo "NEXT")
 
             ("y" "Appointments" agenda*)
@@ -1187,72 +1327,92 @@ Update the ledger-accounts-file to make addition permanent"
              ((todo "NEXT")
               (todo "TODO"))
              ((org-agenda-tag-filter-preset '("+computer"))
-              (org-agenda-files '("~/Documents/org/myGTD.org"
-                                  "~/Documents/org/Projects.org"))
-              (org-agenda-category-filter-preset '("-Financial"
-                                                   "-Calendar"))))
+              (org-agenda-category-filter-preset '("-Calendar"
+                                                   "-Car"
+                                                   "-Someday"
+                                                   "-Read"
+                                                   "-Waiting"
+                                                   "-Ledger"
+                                                   "-References"
+                                                   "-Delegated"))))
 
             ("h" "Home todos"
              ((todo "NEXT")
               (todo "TODO"))
              ((org-agenda-tag-filter-preset '("+home"))
-              (org-agenda-files '("~/Documents/org/myGTD.org"
-                                  "~/Documents/org/Projects.org"))
-              (org-agenda-category-filter-preset '("-Financial"
-                                                   "-Calendar"))))
+              (org-agenda-category-filter-preset '("-Calendar"
+                                                   "-Car"
+                                                   "-Someday"
+                                                   "-Read"
+                                                   "-Waiting"
+                                                   "-Ledger"
+                                                   "-References"
+                                                   "-Delegated"))))
 
             ("w" "Work todos"
              ((todo "NEXT")
               (todo "TODO"))
              ((org-agenda-tag-filter-preset '("+work"))
-              (rg-agenda-files '("~/Documents/org/myGTD.org"
-                                 "~/Documents/org/Projects.org"))
-              (org-agenda-category-filter-preset '("-Financial"
-                                                   "-Calendar"))))
+              (org-agenda-category-filter-preset '("-Calendar"
+                                                   "-Car"
+                                                   "-Someday"
+                                                   "-Read"
+                                                   "-Waiting"
+                                                   "-Ledger"
+                                                   "-References"
+                                                   "-Delegated"))))
 
             ("e" "Errand todos"
              ((todo "NEXT")
               (todo "TODO"))
              ((org-agenda-tag-filter-preset '("+errand"))
-              (org-agenda-files '("~/Documents/org/myGTD.org"
-                                  "~/Documents/org/Projects.org"))
-              (org-agenda-category-filter-preset '("-Financial"
-                                                   "-Calendar"))))
+              (org-agenda-category-filter-preset '("-Calendar"
+                                                   "-Car"
+                                                   "-Someday"
+                                                   "-Read"
+                                                   "-Waiting"
+                                                   "-Ledger"
+                                                   "-References"
+                                                   "-Delegated"))))
 
             ("s" "School todos"
              ((todo "NEXT")
               (todo "TODO"))
              ((org-agenda-tag-filter-preset '("+school"))
-              (org-agenda-files '("~/Documents/org/myGTD.org"
-                                  "~/Documents/org/Projects.org"))
-              (org-agenda-category-filter-preset '("-Financial"
-                                                   "-Calendar"))))
+              (org-agenda-category-filter-preset '("-Calendar"
+                                                   "-Car"
+                                                   "-Someday"
+                                                   "-Read"
+                                                   "-Waiting"
+                                                   "-Ledger"
+                                                   "-References"
+                                                   "-Delegated"))))
 
             ("i" "Collection"
              todo "TODO"
-             ((org-agenda-files '("~/Documents/org/Collection.org"))))
+             ((org-agenda-files '("Collection.org"))))
 
             ("r" "References"
              todo "REFERENCE"
-             ((org-agenda-files '("~/Documents/org/References.org"))))
+             ((org-agenda-category-filter-preset '("+References"))))
 
             ("o" "Someday"
              ((tags "NEXT")
               (todo "SOMEDAY"))
-             ((org-agenda-files '("~/Documents/org/Someday.org"))))
+             ((org-agenda-category-filter-preset '("+Someday"))))
 
             ("v" "Waiting"
              todo "WAITING"
-             ((org-agenda-files '("~/Documents/org/Waiting.org"))))
+             ((org-agenda-category-filter-preset '("+Waiting"))))
 
             ("R" "What to read?"
              ((tags "NEXT")
               (todo "TODO"))
-             ((org-agenda files '("~/Documents/org/Read.org"))))
+             ((org-agenda-category-filter-preset '("+Read"))))
 
             ("d" "Delegated to someone else."
              todo "DELEGATED"
-             ((org-agenda-files '("~/Documents/org/Delegated.org"))))))
+             ((org-agenda-category-filter-preset '("+Delegated"))))))
 
     ;; Change todo to done when all of it's children are finished
     (defun org-summary-todo (n-done n-not-done)
@@ -1269,12 +1429,7 @@ Update the ledger-accounts-file to make addition permanent"
 
     ;;set the defautlt location for agenda files
     (setq org-agenda-files '("~/Documents/org/myGTD.org"
-                             "~/Documents/org/Projects.org"
-                             "~/Documents/org/Collection.org"
-                             "~/Documents/org/Read.org"
-                             "~/Documents/org/Someday.org"
-                             "~/Documents/org/References.org"
-                             "~/Documents/org/deadline.ledger.org"))
+                             "~/Documents/org/Collection.org"))
 
     ;; Projectile configuration
     (with-eval-after-load 'org-agenda
@@ -1331,28 +1486,19 @@ Update the ledger-accounts-file to make addition permanent"
       (interactive)
       (org-open-file (org-odt-export-to-odt)))
 
-    (setq my/org-archive-collection-file-list '("~/Documents/org/myGTD.org"
-                                                "~/Documents/org/Collection.org"
-                                                "~/Documents/org/Someday.org"
-                                                "~/Documents/org/Read.org"))
-
-    (setq my/ledger-org-archive-collection-file-list '("~/Documents/org/deadline.ledger.org"))
+    (setq my/org-archive-collection-file-list '("~/Documents/org/myGTD.org"))
 
     (defun my/org-archive-all-done-todos ()
       "Archive all done todos in my/org-archive-collection-file-list"
       (interactive)
-      (let ((count 0))
-        (dolist (element (list my/org-archive-collection-file-list
-                               my/ledger-org-archive-collection-file-list))
-          (org-map-entries
-           (lambda ()
-             (if (eq count 1)
-                 (my/ledger-org-insert-done-or-created-date)
-               (message "count 0"))
-             (org-archive-subtree)
-             (setq org-map-continue-from (outline-previous-heading)))
-           "/DONE" element)
-          (setq count (+ 1 count)))))
+      (dolist (element (list my/org-archive-collection-file-list))
+        (org-map-entries
+         (lambda ()
+           (if (string-match ":ledger:" (buffer-substring (point-at-bol) (point-at-eol)))
+               (my/ledger-org-insert-done-or-created-date))
+           (org-archive-subtree)
+           (setq org-map-continue-from (outline-previous-heading)))
+         "/DONE" element)))
 
     ;; set autofill in org-mode for word processor like wordwrap functionality.
     (add-hook 'org-mode-hook
@@ -1363,19 +1509,19 @@ Update the ledger-accounts-file to make addition permanent"
                 (setq fill-column 80)
                 (setq yas-indent-line "fixed")
                 ;;enable automatic line wrapping at fill column
-                (auto-fill-mode t)
-                (flyspell-mode 1)))
+                (auto-fill-mode t)))
+
+    (add-hook 'org-capture-after-finalize-hook
+              (lambda ()
+                (if my/ledger-add-this-account-list
+                    (my/ledger-insert-new-account))
+                (if my/ledger-add-this-payee-list
+                    (my/ledger-insert-new-payee))))
 
     ;; Set up org-refile targets here
     (setq org-refile-targets (quote (("myGTD.org" :level . 1)
-                                     ("Projects.org" :maxlevel . 1)
-                                     ("Someday.org" :level . 0)
-                                     ("Waiting.org" :level . 0)
-                                     ("References.org" :level . 0)
-                                     ("Delegated.org" :level . 0)
-                                     ("Read.org" :level . 0)
-                                     ("deadline.ledger.org" :level . 1)
-                                     ("Personal.ledger.org" :level . 0))))
+                                     ("Personal.ledger.org" :level . 0)
+                                     ("myGTD.org" :tag . "refile-target"))))
 
     ;; set to nil so org refile shows all possible targets in helm at one time
     (setq org-outline-path-complete-in-steps nil)
@@ -1384,9 +1530,12 @@ Update the ledger-accounts-file to make addition permanent"
     (setq org-refile-allow-creating-parent-nodes t)
     (setq org-refile-use-outline-path 'file)
 
-    ;;Org-crypt (setq org-tags-exclude-from-inheritance (quote ("crypt")))
-    ;; Todo I need to set this key up and pinentry
-    (setq org-crypt-key "emacs-journal")
+    ;;Org-crypt
+    (setq org-tags-exclude-from-inheritance (quote ("crypt")))
+    ;; need to disable autosaving when using org crypt add to top of org crypt buffers
+    ;; # -*- buffer-auto-save-file-name: nil; -*-
+
+    (setq org-crypt-key "secret-recipes")
     ;; GPG key to use for encryption
     ;; Either the key id or set to nil to use symmetric encryption
     ;; Attention must add:
@@ -1466,34 +1615,123 @@ Update the ledger-accounts-file to make addition permanent"
 ;; org-mode:1 ends here
 
 ;; [[file:~/.spacemacs.d/spacemacs.org::*mu4e][mu4e:1]]
+(require 'mu4e-contrib)
+(setq shr-color-visible-luminance-min 80)
+(setq shr-color-visible-distance-min 5)
+(setq shr-use-colors nil)
+(advice-add #'shr-colorize-region :around (defun shr-no-colourise-region (&rest ignore)))
+
+(require 'mu4e-context)
 (setq mu4e-maildir "~/.mail"
-      mu4e-trash-folder "/gmail/[Gmail]/Trash"
-      mu4e-refile-folder "/gmail/email_archive"
-      mu4e-get-mail-command "mbsync -a"
-      mu4e-update-interval nil
-      mu4e-compose-signature-auto-include t
-      mu4e-view-show-images t
-      mu4e-view-show-addresses t
-      mu4e-sent-folder "/gmail/[Gmail]/Sent Mail"
-      mu4e-drafts-folder "/gmail/[Gmail]/Drafts"
-      ;; Gmail does this see mu4e-sent-messages behavior to configure
-      ;;for additional non gmail accounts
-      mu4e-sent-messages-behavior 'delete
-      user-mail-address "jaredwrd951@gmail.com"
-      user-full-name "Jared Ward"
-      mu4e-compose-signature
-      (concat
-       "Jared M. Ward\n"
-       "Portland, OR")
       message-send-mail-function 'message-send-mail-with-sendmail
-      sendmail-program "/usr/bin/msmtp"
+      sendmail-program "/usr/local/bin/google-oauth2-sendmail"
+      mu4e-attachment-dir "/home/jroddius/Download"
+      message-send-mail-function 'message-send-mail-with-sendmail
+      ;;sendmail-program "/usr/bin/msmtp"
+      sendmail-program "/usr/local/bin/google-oauth2-sendmail"
       ;;Use the correct account context when sending mail based on the from header
       message-sendmail-extra-arguments '("--read-envelope-from")
+      message-sendmail-envelope-from 'header
       message-sendmail-f-is-evil 't
       mu4e-attachment-dir "/home/jroddius/Download"
-      mu4e-change-filenames-when-moving t)
+      mu4e-change-filenames-when-moving t
+      mu4e-context-policy 'pick-first
+      mu4e-compose-context-policy nil)
 
-                                      ;(add-hook 'message-send-mail-hook 'choose-msmtp-account)
+;; Set up inline images for emails
+(setq mu4e-view-show-images t)
+(setq mu4e-view-prefer-html t
+      mu4e-confirm-quit nil)
+
+;; Use imagmagick for images
+(when (fboundp 'imagemagick-register-types)
+  (imagemagick-register-types))
+
+(setq mu4e-contexts
+
+      `( ,(make-mu4e-context
+           :name "Personal"
+           :enter-func (lambda() (message "%s" "Now entering the Personal context."))
+           :match-func (lambda(msg)
+                         (when msg
+                           (or (mu4e-message-contact-field-matches msg
+                                                               '(:from :to)
+                                                               "jaredwrd951@gmail.com")
+                               (string-match-p "^/gmail"
+                                               (mu4e-message-field
+                                                msg
+                                                :maildir)))))
+
+           :vars '( (user-mail-address . "jaredwrd951@gmail.com")
+                   (user-full-name    . "Jared M. Ward")
+                   (mu4e-refile-folder . "/gmail/email_archive")
+                   (mu4e-trash-folder  . "/gmail/[Gmail]/Trash")
+                   (mu4e-get-mail-command . "mbsync -Va -c ~/.config/mbsync/config")
+                   (mu4e-update-interval  . nil )
+                   (mu4e-compose-signature-auto-include . t)
+                   (mu4e-view-show-images . t)
+                   (mu4e-view-show-addresses . t)
+                   (mu4e-sent-folder . "/gmail/[Gmail]/Sent Mail")
+                   (mu4e-drafts-folder . "/gmail/[Gmail]/Drafts")
+                   (mu4e-sent-messages-behavior . delete)
+                   (mu4e-compose-signature . "Jared M. Ward\nPortland, OR")))
+
+         ,(make-mu4e-context
+           :name "Develop"
+           :enter-func (lambda() (message "%s" "Now entering the Develop context."))
+           :match-func (lambda(msg)
+                         (when msg
+                           (or (mu4e-message-contact-field-matches msg
+                                                                   '(:from :to)
+                                                                   "jroddius@gmail.com")
+                               (string-match-p "^/gmail-develop"
+                                               (mu4e-message-field
+                                                msg
+                                                :maildir)))))
+
+           :vars '( (user-mail-address . "jroddius@gmail.com")
+                   (user-full-name    . "Jared M. Ward")
+                   (mu4e-refile-folder . "/gmail-develop/email_archive")
+                   (mu4e-trash-folder  . "/gmail-develop/[Gmail]/Trash")
+                   (mu4e-get-mail-command . "mbsync -Va -c ~/.config/mbsync/config-develop")
+                   (mu4e-update-interval  . nil )
+                   (mu4e-compose-signature-auto-include . t)
+                   (mu4e-view-show-images . t)
+                   (mu4e-view-show-addresses . t)
+                   (mu4e-sent-folder . "/gmail-develop/[Gmail]/Sent Mail")
+                   (mu4e-drafts-folder . "/gmail-develop/[Gmail]/Drafts")
+                   (mu4e-sent-messages-behavior . delete)
+                   (mu4e-compose-signature . "Jared M. Ward\nPortland, OR")))))
+;; (setq mu4e-maildir "~/.mail"
+;;       mu4e-trash-folder "/gmail/[Gmail]/Trash"
+;;       mu4e-refile-folder "/gmail/email_archive"
+;;       mu4e-get-mail-command "mbsync -a"
+;;       mu4e-update-interval nil
+;;       mu4e-compose-signature-auto-include t
+;;       mu4e-view-show-images t
+;;       mu4e-view-show-addresses t
+;;       mu4e-sent-folder "/gmail/[Gmail]/Sent Mail"
+;;       mu4e-drafts-folder "/gmail/[Gmail]/Drafts"
+;;       ;; Gmail does this see mu4e-sent-messages behavior to configure
+;;       ;;for additional non gmail accounts
+;;       mu4e-sent-messages-behavior 'delete
+;;       user-mail-address "jaredwrd951@gmail.com"
+;;       user-full-name "Jared Ward"
+;;       mu4e-compose-signature
+;;       (concat
+;;        "Jared M. Ward\n"
+;;        "Portland, OR")
+;;       message-send-mail-function 'message-send-mail-with-sendmail
+;;       ;;sendmail-program "/usr/bin/msmtp"
+;;       sendmail-program "/usr/local/bin/google-oauth2-sendmail"
+;;       ;;Use the correct account context when sending mail based on the from header
+;;       message-sendmail-extra-arguments '("--read-envelope-from")
+;;       message-sendmail-envelope-from 'header
+;;       message-sendmail-f-is-evil 't
+;;       mu4e-attachment-dir "/home/jroddius/Download"
+;;       mu4e-change-filenames-when-moving t)
+
+;;                                       ;(add-hook 'message-send-mail-hook 'choose-msmtp-account)
 
 (setq mu4e-maildir-shortcuts
       '(("/gmail/primary/" . ?p)
@@ -1547,15 +1785,8 @@ Update the ledger-accounts-file to make addition permanent"
 
 ;; open buffers in emacs automatically
 (find-file-noselect "~/Documents/org/myGTD.org")
-(find-file-noselect "~/Documents/org/Personal.ledger.org")
-(find-file-noselect "~/Documents/org/Projects.org")
-(find-file-noselect "~/Documents/org/Collection.org")
-(find-file-noselect "~/Documents/org/References.org")
-(find-file-noselect "~/Documents/org/Read.org")
-(find-file-noselect "~/Documents/org/Delegated.org")
-(find-file-noselect "~/Documents/org/Waiting.org")
-(find-file-noselect "~/Documents/org/Someday.org")
-(find-file-noselect "~/Documents/org/deadline.ledger.org")
+(find-file-noselect my/ledger-org-accounts-file)
+(find-file-noselect ledger-accounts-file)
 
 
 ;; Set defaul browser for emacs to call
@@ -1589,22 +1820,20 @@ Update the ledger-accounts-file to make addition permanent"
 This is an auto-generated function, do not modify its content directly, use
 Emacs customize menu instead.
 This function is called at the very end of Spacemacs initialization."
-  (custom-set-variables
-   ;; custom-set-variables was added by Custom.
-   ;; If you edit it by hand, you could mess it up, so be careful.
-   ;; Your init file should contain only one such instance.
-   ;; If there is more than one, they won't work right.
-   '(evil-want-Y-yank-to-eol nil)
-   '(package-selected-packages
-     (quote
-      (yasnippet-classic-snippets zones php-extras zenburn-theme zen-and-art-theme white-sand-theme underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme seti-theme reverse-theme rebecca-theme railscasts-theme purple-haze-theme professional-theme planet-theme phoenix-dark-pink-theme phoenix-dark-mono-theme organic-green-theme omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme naquadah-theme mustang-theme monokai-theme monochrome-theme molokai-theme moe-theme minimal-theme material-theme majapahit-theme madhat2r-theme lush-theme light-soap-theme jbeans-theme jazz-theme ir-black-theme inkpot-theme heroku-theme hemisu-theme hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme gandalf-theme flatui-theme flatland-theme farmhouse-theme exotica-theme espresso-theme dracula-theme django-theme darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cyberpunk-theme color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized clues-theme cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes afternoon-theme helm-pass vmd-mode mmm-mode markdown-toc gh-md company-auctex auctex drupal-mode phpunit phpcbf php-auto-yasnippets php-mode pkgbuild-mode typit mmt sudoku pacmacs dash-functional 2048-game flyspell-popup company-quickhelp auth-source-pass password-store smeargle orgit magit-gitflow helm-gitignore gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link evil-magit magithub markdown-mode ghub+ magit magit-popup git-commit apiwrap ghub let-alist with-editor web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data flycheck-pos-tip pos-tip flycheck flyspell-correct-helm flyspell-correct auto-dictionary ox-gfm org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot insert-shebang fish-mode company-shell xterm-color shell-pop multi-term eshell-z eshell-prompt-extras esh-help helm-company helm-c-yasnippet fuzzy disaster company-statistics company-c-headers company cmake-mode clang-format auto-yasnippet yasnippet ac-ispell auto-complete ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
-  (custom-set-faces
-   ;; custom-set-faces was added by Custom.
-   ;; If you edit it by hand, you could mess it up, so be careful.
-   ;; Your init file should contain only one such instance.
-   ;; If there is more than one, they won't work right.
-   '(default ((t (:background nil))))
-   '(company-tooltip-common ((t (:inherit company-tooltip :weight bold :underline nil))))
-   '(company-tooltip-common-selection ((t (:inherit company-tooltip-selection :weight bold :underline nil)))))
-  )
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(evil-want-Y-yank-to-eol nil)
+ '(package-selected-packages
+   (quote
+    (org-caldav oauth2 php-extras zenburn-theme zen-and-art-theme white-sand-theme underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme seti-theme reverse-theme rebecca-theme railscasts-theme purple-haze-theme professional-theme planet-theme phoenix-dark-pink-theme phoenix-dark-mono-theme organic-green-theme omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme naquadah-theme mustang-theme monokai-theme monochrome-theme molokai-theme moe-theme minimal-theme material-theme majapahit-theme madhat2r-theme lush-theme light-soap-theme jbeans-theme jazz-theme ir-black-theme inkpot-theme heroku-theme hemisu-theme hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme gandalf-theme flatui-theme flatland-theme farmhouse-theme exotica-theme espresso-theme dracula-theme django-theme darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cyberpunk-theme color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized clues-theme cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes afternoon-theme helm-pass vmd-mode mmm-mode markdown-toc gh-md company-auctex auctex drupal-mode phpunit phpcbf php-auto-yasnippets php-mode pkgbuild-mode typit mmt sudoku pacmacs dash-functional 2048-game flyspell-popup company-quickhelp auth-source-pass password-store smeargle orgit magit-gitflow helm-gitignore gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link evil-magit magithub markdown-mode ghub+ magit magit-popup git-commit apiwrap ghub let-alist with-editor web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data flycheck-pos-tip pos-tip flycheck flyspell-correct-helm flyspell-correct auto-dictionary ox-gfm org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot insert-shebang fish-mode company-shell xterm-color shell-pop multi-term eshell-z eshell-prompt-extras esh-help helm-company helm-c-yasnippet fuzzy disaster company-statistics company-c-headers company cmake-mode clang-format auto-yasnippet yasnippet ac-ispell auto-complete ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(default ((t (:background nil)))))
+)
 ;; This is where *emacs* will auto generate custom variable definitions:1 ends here
